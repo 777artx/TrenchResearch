@@ -25,3 +25,18 @@ def dex_daily_rows(body: dict, chain: str, before: date) -> list[dict]:
             continue
         rows.append({"chain": chain, "day": day, "volume_usd": float(vol) if vol else None})
     return rows
+
+
+COINS_URL = "https://coins.llama.fi"
+PRICE_ASSETS = {"ETH": "coingecko:ethereum", "SOL": "coingecko:solana"}
+MAX_POINTS = 500  # per request, across all coins
+
+
+def price_rows(body: dict, asset: str, coin_id: str, before: date) -> list[dict]:
+    pts = ((body.get("coins") or {}).get(coin_id) or {}).get("prices") or []
+    rows = {}
+    for p in pts:
+        day = datetime.fromtimestamp(int(p["timestamp"]), UTC).date()
+        if day < before:
+            rows[day] = {"asset": asset, "day": day, "price_usd": float(p["price"])}
+    return list(rows.values())

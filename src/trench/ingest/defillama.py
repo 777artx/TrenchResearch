@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import uuid
+from datetime import UTC, date, datetime, timedelta
 
 from trench import chains
 from trench.http import HttpClient, NotFound, UpstreamError
@@ -36,4 +37,29 @@ def run(lake: Lake, raw: RawStore, client: HttpClient | None = None) -> dict:
             client.close()
     if rows:
         lake.write("llama_dex_daily", rows, run_id=run_id, fetched_at=utcnow())
-    return {"run_id": run_id, "rows": len(rows), "errors": errors}
+    prices = run_prices(lake, raw, run_id)
+    return {"run_id": run_id, "rows": len(rows), "price_rows": prices, "errors": errors}
+
+
+def run_prices(lake: Lake, raw: RawStore, run_id: str, start: date = date(2023, 1, 1)) -> int:
+    """Daily ETH and SOL prices from start to yesterday (coins.llama.fi)."""
+    client = HttpClient(source="defillama_coins", base_url=dl.COINS_URL, raw_store=raw,
+                        max_per_minute=dl.MAX_PER_MINUTE)
+    today = utcnow().date()
+    rows: list[dict] = []
+    try:
+        for asset, coin in dl.PRICE_ASSETS.items():
+            cur = start
+            while cur < today:
+                ts = int(datetime(cur.year, cur.month, cur.day, tzinfo=UTC).timestamp())
+                f = client.get_json(f"/chart/{coin}",
+                                    {"start": ts, "span": dl.MAX_POINTS, "period": "1d"})
+                for r in dl.price_rows(f.data, asset, coin, before=today):
+                    r["raw_sha256"] = f.raw.sha256
+                    rows.append(r)
+                cur += timedelta(days=dl.MAX_POINTS)
+    finally:
+        client.close()
+    if rows:
+        lake.write("llama_price_daily", rows, run_id=run_id, fetched_at=utcnow())
+    return len(rows)
