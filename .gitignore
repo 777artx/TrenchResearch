@@ -1,0 +1,7 @@
+# Local data lake and raw cache. Never committed; see docs/ARCHITECTURE.md.
+/data/
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
