@@ -32,6 +32,11 @@ QUALIFY LOGICAL_OR(mint IN UNNEST(@mints)) OVER (PARTITION BY tx_signature)
 """
 
 
+# Hard monthly cap, kept well under the 1 TB free tier so nothing is ever billed even
+# if billing were enabled on the project. Counted from our own extract log.
+MONTHLY_CAP_GB = 800.0
+
+
 class BudgetExceeded(Exception):
     pass
 
@@ -55,7 +60,8 @@ def client(key_path: Path | None = None):
 
 
 def extract_transfers(
-    bq, start: datetime, end: datetime, mints: list[str], *, max_gb: float = 25.0
+    bq, start: datetime, end: datetime, mints: list[str], *, max_gb: float = 25.0,
+    used_this_month_gb: float = 0.0, monthly_cap_gb: float = MONTHLY_CAP_GB,
 ) -> ExtractResult:
     from google.cloud import bigquery
 
@@ -73,7 +79,12 @@ def extract_transfers(
     )
     gb = dry.total_bytes_processed / 1e9
     if gb > max_gb:
-        raise BudgetExceeded(f"query would scan {gb:.1f} GB > budget {max_gb} GB")
+        raise BudgetExceeded(f"query would scan {gb:.1f} GB > per-query budget {max_gb} GB")
+    if used_this_month_gb + gb > monthly_cap_gb:
+        raise BudgetExceeded(
+            f"query would bring this month to {used_this_month_gb + gb:.0f} GB "
+            f"> monthly cap {monthly_cap_gb:.0f} GB"
+        )
     job = bq.query(EXTRACT_SQL, job_config=bigquery.QueryJobConfig(query_parameters=params))
     tbl = job.result().to_arrow()
     return ExtractResult(tbl, job.total_bytes_processed or 0, job.total_bytes_billed or 0,

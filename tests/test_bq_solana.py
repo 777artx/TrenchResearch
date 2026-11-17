@@ -32,3 +32,11 @@ def test_budget_guard_refuses_before_running():
 def test_requires_mints():
     with pytest.raises(ValueError):
         bq_solana.extract_transfers(_FakeBQ(1), datetime.now(UTC), datetime.now(UTC), [])
+
+
+def test_monthly_cap_refuses_before_running():
+    bq = _FakeBQ(gb=20)
+    t0, t1 = datetime(2026, 11, 16, tzinfo=UTC), datetime(2026, 11, 17, tzinfo=UTC)
+    with pytest.raises(bq_solana.BudgetExceeded, match="monthly cap"):
+        bq_solana.extract_transfers(bq, t0, t1, ["Mint1"], used_this_month_gb=790)
+    assert bq.real_queries == 0

@@ -43,11 +43,26 @@ def tracked_mints(lake: Lake, min_liquidity: float = 25_000.0) -> list[str]:
     return sorted(m for m in mints if m)
 
 
+def gb_used_this_month(lake: Lake) -> float:
+    """BigQuery bytes processed by our extracts in the current UTC calendar month.
+    Uses bytes processed (not billed) so the count is conservative."""
+    if "sol_extract_log" not in lake.tables():
+        return 0.0
+    now = utcnow()
+    month_start = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+    (b,) = lake.connect().execute(
+        "SELECT coalesce(sum(bytes_processed), 0) FROM sol_extract_log WHERE fetched_at >= ?",
+        [month_start],
+    ).fetchone()
+    return float(b) / 1e9
+
+
 def run(lake: Lake, start: datetime, end: datetime, *, mints: list[str] | None = None,
         max_gb: float = 25.0, bq=None) -> dict:
     mints = mints if mints is not None else tracked_mints(lake)
     bq = bq or bq_solana.client()
-    res = bq_solana.extract_transfers(bq, start, end, mints, max_gb=max_gb)
+    res = bq_solana.extract_transfers(bq, start, end, mints, max_gb=max_gb,
+                                      used_this_month_gb=gb_used_this_month(lake))
     t = res.table
     # BigQuery NUMERIC arrives as decimal128; keep exact values as strings.
     for col in ("value",):
