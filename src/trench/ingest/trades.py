@@ -27,6 +27,7 @@ from trench.timeutil import utcnow
 
 log = logging.getLogger(__name__)
 FEED_MAX = 300
+FLUSH_EVERY = 20  # pools; save progress so an interrupted cycle keeps its data
 
 
 @dataclass
@@ -84,8 +85,23 @@ def run_cycle(lake: Lake, raw: RawStore, pit: PITStore, client: HttpClient | Non
     rep.pools = len(pools)
     newest, seen = _state(lake)
     trades, polls = [], []
+    part = 0
+
+    def flush() -> None:
+        nonlocal trades, polls, part
+        now = utcnow()
+        if trades:
+            lake.write("gt_trades", trades, run_id=f"{rep.run_id}_{part:03d}", fetched_at=now)
+            rep.new_trades += len(trades)
+        if polls:
+            lake.write("gt_trade_polls", polls, run_id=f"{rep.run_id}_{part:03d}",
+                       fetched_at=now)
+        trades, polls, part = [], [], part + 1
+
     try:
-        for chain, pool, token in pools:
+        for i, (chain, pool, token) in enumerate(pools):
+            if i and i % FLUSH_EVERY == 0:
+                flush()
             net = chains.CHAINS[chain].geckoterminal
             rep.requests += 1
             polled_at = utcnow()
@@ -113,14 +129,9 @@ def run_cycle(lake: Lake, raw: RawStore, pit: PITStore, client: HttpClient | Non
                           "oldest_in_feed": oldest, "prev_newest": prev, "gap": gap,
                           "first_poll": prev is None})
     finally:
+        flush()
         if own:
             client.close()
-    now = utcnow()
-    if trades:
-        lake.write("gt_trades", trades, run_id=rep.run_id, fetched_at=now)
-    if polls:
-        lake.write("gt_trade_polls", polls, run_id=rep.run_id, fetched_at=now)
-    rep.new_trades = len(trades)
     log.info("trades cycle %s: %d pools, %d new trades, %d gaps", rep.run_id, rep.pools,
              rep.new_trades, rep.gaps)
     return rep
