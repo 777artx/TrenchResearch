@@ -50,6 +50,37 @@ def ingest_markets(
     typer.echo(json.dumps(out, indent=2))
 
 
+@ingest_app.command("trades")
+def ingest_trades(
+    cycles: int = typer.Option(1, help="Polling cycles to run back to back."),
+) -> None:
+    """Poll GeckoTerminal recent trades for every universe pool (one request per pool)."""
+    from trench.ingest import trades
+    from trench.pit import PITStore
+
+    s = Settings.from_env()
+    lake, raw, pit = Lake(s.lake_dir), RawStore(s.raw_dir), PITStore(s.lake_dir / "published")
+    for _ in range(cycles):
+        r = trades.run_cycle(lake, raw, pit)
+        typer.echo(json.dumps({**r.__dict__, "errors": r.errors[:5]}, default=str))
+
+
+@ingest_app.command("evm-swaps")
+def ingest_evm_swaps(
+    chain: list[str] = typer.Option(["robinhood", "base", "ethereum"]),
+    days_back: float = typer.Option(2.0, help="History on a pool's first sight."),
+) -> None:
+    """Swap logs for universe pools from public RPCs, with the trader of each swap."""
+    from trench.ingest import evm_swaps
+    from trench.pit import PITStore
+
+    s = Settings.from_env()
+    lake, pit = Lake(s.lake_dir), PITStore(s.lake_dir / "published")
+    for c in chain:
+        r = evm_swaps.run(lake, pit, c, days_back=days_back)
+        typer.echo(json.dumps(r.__dict__, default=str))
+
+
 @app.command("universe")
 def universe_build() -> None:
     """Publish new universe entries from the snapshots fetched so far."""

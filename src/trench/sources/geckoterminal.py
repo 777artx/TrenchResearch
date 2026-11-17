@@ -89,3 +89,43 @@ def ohlcv_rows(body: dict, chain: str, pool: str, token: str, before: date) -> l
              "open": _f(o), "high": _f(h), "low": _f(lo), "close": _f(c), "volume_usd": _f(v)}
         )
     return rows
+
+
+def trade_rows(body: dict, chain: str, pool: str, token: str) -> list[dict]:
+    """Trades on ``pool`` (newest first, at most 300 from the last 24h), normalized
+    to the tracked ``token``: side, token amount, quote token and amount, USD value
+    and the transaction signer, which is the trading wallet."""
+    rows = []
+    for d in body.get("data") or []:
+        a = d.get("attributes") or {}
+        frm = chains.norm_address(chain, a.get("from_token_address") or "")
+        to = chains.norm_address(chain, a.get("to_token_address") or "")
+        if to == token:
+            side, q_tok = "buy", frm
+            tok_amt, q_amt = a.get("to_token_amount"), a.get("from_token_amount")
+        elif frm == token:
+            side, q_tok = "sell", to
+            tok_amt, q_amt = a.get("from_token_amount"), a.get("to_token_amount")
+        else:
+            continue
+        wallet = a.get("tx_from_address")
+        rows.append({
+            "trade_id": d.get("id"),
+            "chain": chain,
+            "pool_address": pool,
+            "token": token,
+            "tx_hash": a.get("tx_hash"),
+            "block_number": a.get("block_number"),
+            "block_timestamp": _ts(a.get("block_timestamp")),
+            "wallet": chains.norm_address(chain, wallet) if wallet else None,
+            "side": side,
+            "token_amount": _f(tok_amt),
+            "quote_token": q_tok,
+            "quote_amount": _f(q_amt),
+            "volume_usd": _f(a.get("volume_in_usd")),
+            "price_usd": _f(
+                a.get("price_to_in_usd") if side == "buy" else a.get("price_from_in_usd")
+            ),
+            "is_anomalous": a.get("is_anomalous"),
+        })
+    return rows
