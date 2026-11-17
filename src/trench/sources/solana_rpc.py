@@ -15,6 +15,7 @@ from collections.abc import Iterable
 import httpx
 
 from trench.http import RateLimiter
+from trench.usage import Ledger
 
 HELIUS_RPC = "https://mainnet.helius-rpc.com/"
 BATCH = 100
@@ -22,18 +23,22 @@ BATCH = 100
 
 class SolanaRPC:
     def __init__(self, url: str = HELIUS_RPC, per_minute: int = 300,
-                 transport: httpx.BaseTransport | None = None):
+                 transport: httpx.BaseTransport | None = None,
+                 ledger: Ledger | None = None, provider: str = "helius"):
         # Helius free plan: 10 requests/second. 300/min keeps half of that free.
         self.url = url
         self.limiter = RateLimiter(per_minute)
         self._c = httpx.Client(timeout=60, transport=transport,
                                headers={"User-Agent": "trench-research/0.1"})
         self.calls = 0
+        self.ledger = ledger or Ledger()
+        self.provider = provider
 
     def close(self) -> None:
         self._c.close()
 
     def _call(self, method: str, params: list):
+        self.ledger.charge(self.provider, method)  # refuses before sending if over cap
         self.limiter.acquire()
         self.calls += 1
         r = self._c.post(self.url, json={"jsonrpc": "2.0", "id": 1, "method": method,

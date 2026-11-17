@@ -84,6 +84,21 @@ def tables() -> None:
 
 
 @app.command()
+def usage() -> None:
+    """This month's metered usage against our caps and the free allowances."""
+    from trench.usage import Ledger
+
+    for name, r in Ledger(Settings.from_env().data_dir).report().items():
+        pct = 100 * r["used"] / r["allowance"]
+        typer.echo(f"{name:8s} {r['used']:>12,.0f} / cap {r['cap']:>12,.0f} {r['unit']}"
+                   f"  ({pct:.1f}% of free allowance)")
+    from trench.ingest.solana_transfers import gb_used_this_month
+
+    gb = gb_used_this_month(Lake(Settings.from_env().lake_dir))
+    typer.echo(f"bigquery {gb:>12,.1f} / cap {800:>12,} GB (logged extracts only)")
+
+
+@app.command()
 def sql(query: str) -> None:
     """Run SQL against the lake views (all fetched versions) and published metrics."""
     s = Settings.from_env()
