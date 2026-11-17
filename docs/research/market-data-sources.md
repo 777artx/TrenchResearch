@@ -25,3 +25,11 @@ The most frequent quote tokens in Robinhood pairs on 2026-11-17 were WETH (`0x0b
 ## First run (2026-11-17)
 
 The first live run registered 811 tokens (Solana 410, Robinhood 247, Ethereum 63, Base 46, BNB 45). DexScreener returned pairs for 587, and 110 pairs met the universe thresholds that day. GeckoTerminal rejected about 100 requests with 429 although the run averaged under 30 per minute: the limiter allowed bursts. The limiter now spaces calls evenly (now 15 per minute for GeckoTerminal; a second run at 20 per minute still drew 10 rejections out of 135) and backs off 10, 20, 40 and 80 seconds after a 429, since GeckoTerminal sends no Retry-After header. A paced test of 24 requests at 12 per minute had no rejections.
+
+## First trade-collector pass (2026-11-17)
+
+186 universe pools polled once: about 43,000 trades from about 13,200 wallets (Base 11,194; Ethereum 9,299; Robinhood 9,862; Solana 12,724). About 6 requests per minute got through, so a full pass takes 35 to 40 minutes.
+
+Median trade size is $25 on Solana, $81 on Base, $83 on Robinhood and $649 on Ethereum, but dollar totals are dominated by a few very large trades (for example two identical 5,000,000 USDG trades on one Robinhood token seconds apart, a round trip). Raw dollar sums from the trade feed are therefore never used without the organic filter. No trades were flagged `is_anomalous` by GeckoTerminal.
+
+124 of 184 polled pools returned a full feed of 300 trades on the first pass, meaning they trade faster than one pass can capture. Later passes will measure gaps directly.

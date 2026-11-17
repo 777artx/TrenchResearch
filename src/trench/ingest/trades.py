@@ -52,6 +52,7 @@ def target_pools(lake: Lake, pit: PITStore) -> list[tuple[str, str, str]]:
         """SELECT p.chain, arg_max(p.pair_address, p.liquidity_usd), p.base_token
            FROM dxs_pair_snapshot p JOIN m ON p.chain = m.chain AND p.base_token = m.token
            WHERE p.run_id = (SELECT max(run_id) FROM dxs_pair_snapshot)
+             AND p.liquidity_usd IS NOT NULL AND p.pair_address IS NOT NULL
            GROUP BY p.chain, p.base_token ORDER BY 1, 3"""
     ).fetchall()
 
