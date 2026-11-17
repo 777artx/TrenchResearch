@@ -34,10 +34,40 @@ def ingest_tehcscreener() -> None:
     typer.echo(json.dumps(report.__dict__, indent=2))
 
 
+@ingest_app.command("markets")
+def ingest_markets(
+    ohlcv_budget: int = typer.Option(150, help="GeckoTerminal OHLCV requests this run."),
+) -> None:
+    """Discover tokens, snapshot DexScreener pairs, backfill GeckoTerminal daily OHLCV."""
+    from trench.ingest import markets
+
+    s = Settings.from_env()
+    cfg = markets.MarketsConfig(ohlcv_budget=ohlcv_budget)
+    report = markets.run(Lake(s.lake_dir), RawStore(s.raw_dir), cfg)
+    out = dict(report.__dict__)
+    out["errors"] = report.errors[:20] + ([f"... {len(report.errors) - 20} more"]
+                                          if len(report.errors) > 20 else [])
+    typer.echo(json.dumps(out, indent=2))
+
+
+@app.command("universe")
+def universe_build() -> None:
+    """Publish new universe entries from the snapshots fetched so far."""
+    from trench import universe
+    from trench.pit import PITStore
+
+    s = Settings.from_env()
+    n = universe.build(Lake(s.lake_dir), PITStore(s.lake_dir / "published"))
+    typer.echo(f"published {n} new universe entries")
+
+
 @app.command()
 def daily() -> None:
-    """The daily job. Phase 0: ingest every wired source."""
+    """The daily job: TEHscreener, then markets (which reads TEHscreener's top tokens),
+    then the universe."""
     ingest_tehcscreener()
+    ingest_markets(ohlcv_budget=150)
+    universe_build()
 
 
 @app.command()

@@ -22,6 +22,11 @@ Data is written under `./data` (override with `TRENCH_DATA_DIR`) and is never co
 
 ## Status
 
-Phase 0 (foundation) is in progress. Done: point-in-time storage, raw response cache, rate-limited client, TEHscreener ingestion with full history. Next: DexScreener and GeckoTerminal prices and liquidity, Dune trade-level ingestion for Solana, and the universe builder.
+Phase 0 (foundation) is in progress.
+
+- Done: point-in-time storage, raw response cache, rate-limited client, TEHscreener ingestion with full history, DexScreener and GeckoTerminal market data (discovery, token registry, pair snapshots, daily OHLCV), and the forward point-in-time universe (v1).
+- Next: Dune trade-level ingestion for Solana, which also enables the universe backfill before 2026-11-17.
+
+The daily job is `uv run trench daily`.
 
 Aggregate data from TEHscreener is credited to tehcscreener.com.

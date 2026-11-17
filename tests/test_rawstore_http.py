@@ -18,8 +18,23 @@ def test_rate_limiter_blocks_until_window_frees():
     rl = RateLimiter(2, period=60, clock=lambda: t[0], sleep=sleep)
     rl.acquire()
     rl.acquire()
-    rl.acquire()  # third call must wait ~60s
-    assert len(sleeps) == 1 and 59.9 < sleeps[0] < 60.1
+    rl.acquire()  # third call must wait until the window frees
+    assert 59.9 < t[0] < 60.1
+
+
+def test_rate_limiter_paces_evenly_instead_of_bursting():
+    t = [0.0]
+
+    def sleep(s):
+        t[0] += s
+
+    rl = RateLimiter(20, period=60, clock=lambda: t[0], sleep=sleep)
+    stamps = []
+    for _ in range(5):
+        rl.acquire()
+        stamps.append(t[0])
+    gaps = [b - a for a, b in zip(stamps, stamps[1:], strict=False)]
+    assert all(g >= 2.999 for g in gaps)  # 60 s / 20 calls
 
 
 def _client(tmp_path, handler, **kw):

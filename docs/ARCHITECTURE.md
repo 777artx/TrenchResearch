@@ -59,3 +59,18 @@ History fetched on our first run is a caveat: for days before that run we only k
 | `teh_rwa_daily` | chain, day | tokenized RWA volume and value |
 | `teh_trench_*` | day | competitor index, kept for comparison only |
 | `teh_status`, `teh_*_profile` | snapshot | upstream sync and profile metadata |
+
+## Tables (markets)
+
+| Table | Grain | Notes |
+|---|---|---|
+| `gt_pool_snapshot` | chain, pool, fetch | GeckoTerminal top, new and trending pools: reserve, market cap, FDV, 24h volume, unique buyers and sellers |
+| `token_registry` | chain, token | grows only; first discovery and how it was found |
+| `dxs_pair_snapshot` | chain, pair, fetch | DexScreener state of every pair of every registered token |
+| `gt_pool_ohlcv_day` | chain, pool, token, day | daily USD candles for each token's most liquid pool; incomplete current day excluded |
+
+## Published metrics
+
+| Metric | Entity | Meaning |
+|---|---|---|
+| `universe_entry` (v1) | `chain:token` | date the token first met the universe rule; never removed. Membership on a date = all entries dated on or before it. |

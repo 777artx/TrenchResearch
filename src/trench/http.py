@@ -25,7 +25,12 @@ class UpstreamError(Exception):
 
 
 class RateLimiter:
-    """Sliding-window limiter: at most ``max_calls`` per ``period`` seconds."""
+    """At most ``max_calls`` per ``period`` seconds, evenly paced.
+
+    Calls are spaced at least ``period / max_calls`` apart. A plain sliding window
+    would allow the whole minute's budget in one burst, which some upstreams
+    (GeckoTerminal) reject with 429 even when the per-minute total is respected.
+    """
 
     def __init__(
         self,
@@ -40,6 +45,7 @@ class RateLimiter:
         self._sleep = sleep
         self._calls: deque[float] = deque()
         self._lock = threading.Lock()
+        self.min_interval = period / max_calls
 
     def acquire(self) -> None:
         with self._lock:
@@ -47,6 +53,9 @@ class RateLimiter:
                 now = self._clock()
                 while self._calls and now - self._calls[0] >= self.period:
                     self._calls.popleft()
+                if self._calls and now - self._calls[-1] < self.min_interval:
+                    self._sleep(self.min_interval - (now - self._calls[-1]))
+                    continue
                 if len(self._calls) < self.max_calls:
                     self._calls.append(now)
                     return
@@ -69,6 +78,7 @@ class HttpClient:
         max_per_minute: int,
         timeout: float = 60.0,
         max_retries: int = 5,
+        backoff_base: float = 2.0,
         transport: httpx.BaseTransport | None = None,
         sleep: Callable[[float], None] = time.sleep,
         headers: dict[str, str] | None = None,
@@ -76,6 +86,7 @@ class HttpClient:
         self.source = source
         self.raw_store = raw_store
         self.max_retries = max_retries
+        self.backoff_base = backoff_base
         self._sleep = sleep
         self.limiter = RateLimiter(max_per_minute, sleep=sleep)
         self._client = httpx.Client(
@@ -97,15 +108,17 @@ class HttpClient:
                 resp = self._client.get(endpoint, params=params)
             except httpx.TransportError as exc:
                 last_err = exc
-                self._sleep(min(60.0, 2.0**attempt))
+                self._sleep(min(60.0, self.backoff_base * 2.0**attempt))
                 continue
             if resp.status_code == 429 or resp.status_code >= 500:
                 last_err = UpstreamError(f"{resp.status_code} on {endpoint}")
                 retry_after = resp.headers.get("Retry-After")
                 try:
-                    wait = float(retry_after) if retry_after else 2.0**attempt
+                    wait = float(retry_after) if retry_after else None
                 except ValueError:
-                    wait = 2.0**attempt
+                    wait = None
+                if wait is None:
+                    wait = self.backoff_base * 2.0**attempt
                 self._sleep(min(120.0, wait))
                 continue
             if resp.status_code == 404:
