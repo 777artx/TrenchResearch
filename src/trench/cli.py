@@ -85,6 +85,7 @@ def tables() -> None:
 
 @app.command()
 def sql(query: str) -> None:
-    """Run SQL against the lake views (all fetched versions)."""
+    """Run SQL against the lake views (all fetched versions) and published metrics."""
     s = Settings.from_env()
-    Lake(s.lake_dir).connect().sql(query).show(max_rows=50)
+    con = Lake(s.lake_dir).connect()
+    Lake(s.lake_dir / "published").connect(con).sql(query).show(max_rows=50)

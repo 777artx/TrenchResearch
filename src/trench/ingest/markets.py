@@ -36,7 +36,7 @@ log = logging.getLogger(__name__)
 class MarketsConfig:
     gt_top_pages: int = 3
     gt_new_pages: int = 3
-    ohlcv_budget: int = 150  # GeckoTerminal OHLCV requests per run (20/min)
+    ohlcv_budget: int = 150  # GeckoTerminal OHLCV requests per run (15/min)
     ohlcv_min_liquidity_usd: float = 25_000.0
     chains: tuple[str, ...] = tuple(chains.CHAINS)
 

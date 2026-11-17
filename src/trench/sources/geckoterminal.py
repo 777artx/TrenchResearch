@@ -13,7 +13,7 @@ from trench import chains
 
 BASE_URL = "https://api.geckoterminal.com/api/v2"
 SOURCE = "geckoterminal"
-MAX_PER_MINUTE = 20  # paced evenly; bursts at the documented 30/min drew 429s
+MAX_PER_MINUTE = 15  # paced evenly; bursts at 30/min drew ~100 429s, 20/min still ~10
 BACKOFF_BASE = 10.0  # 429s carry no Retry-After: wait 10, 20, 40, 80 s
 HEADERS = {"Accept": "application/json;version=20230302"}
 OHLCV_MAX_DAYS = 1000  # per-request limit; free history is shorter (~180 days)
