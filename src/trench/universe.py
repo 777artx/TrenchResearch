@@ -19,7 +19,7 @@ import json
 from dataclasses import dataclass
 from datetime import date, datetime
 
-from trench.chains import QUOTE_ASSETS
+from trench.chains import ACTIVE, QUOTE_ASSETS
 from trench.lake import Lake
 from trench.pit import PITStore, Reading
 from trench.timeutil import utcnow
@@ -67,7 +67,7 @@ def build(lake: Lake, pit: PITStore, rule: UniverseRule | None = None,
     cutoff = cutoff or utcnow()
     first: dict[tuple[str, str], tuple] = {}
     for chain, tok, at, mcap, liq, src in _observations(lake, cutoff):
-        if not tok or tok in QUOTE_ASSETS.get(chain, set()):
+        if chain not in ACTIVE or not tok or tok in QUOTE_ASSETS.get(chain, set()):
             continue
         if (mcap or 0) >= rule.min_market_cap_usd and (liq or 0) >= rule.min_liquidity_usd:
             key = (chain, tok)
@@ -97,8 +97,13 @@ def _published(pit: PITStore, rule: UniverseRule, known_at: datetime | None = No
 
 def members(pit: PITStore, day: date, *, known_at: datetime | None = None,
             rule: UniverseRule | None = None) -> set[str]:
-    """Universe on ``day``: every entry dated on or before it. Nothing ever leaves."""
-    return {row[1] for row in _published(pit, rule or UniverseRule(), known_at) if row[2] <= day}
+    """Universe on ``day``: every entry dated on or before it, on active chains.
+    Nothing ever leaves; entries on a deactivated chain stay stored but are not read."""
+    return {
+        row[1]
+        for row in _published(pit, rule or UniverseRule(), known_at)
+        if row[2] <= day and row[1].split(":", 1)[0] in ACTIVE
+    }
 
 
 def entry_detail(row) -> dict:

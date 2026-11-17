@@ -12,6 +12,7 @@ class Chain:
     geckoterminal: str
     tehcscreener: str
     evm: bool
+    active: bool = True  # inactive chains are kept for history but not ingested or read
 
 
 CHAINS: dict[str, Chain] = {
@@ -20,10 +21,13 @@ CHAINS: dict[str, Chain] = {
         Chain("solana", "solana", "solana", "solana", evm=False),
         Chain("base", "base", "base", "base", evm=True),
         Chain("ethereum", "ethereum", "eth", "ethereum", evm=True),
-        Chain("bnb", "bsc", "bsc", "bnb", evm=True),
+        # BNB Chain deferred by Arthur on 2026-11-17. Entries already stored stay in history.
+        Chain("bnb", "bsc", "bsc", "bnb", evm=True, active=False),
         Chain("robinhood", "robinhood", "robinhood", "robinhood", evm=True),
     ]
 }
+
+ACTIVE: tuple[str, ...] = tuple(c.id for c in CHAINS.values() if c.active)
 
 _BY_TEH = {c.tehcscreener: c.id for c in CHAINS.values()}
 _BY_GT = {c.geckoterminal: c.id for c in CHAINS.values()}

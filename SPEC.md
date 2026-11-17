@@ -26,6 +26,9 @@ We are building an onchain research website for active traders in memecoins and 
 - Catalyst feed.
 - Wallet labels as a user-facing product. Wallet tracking is crowded and copy-trade alpha decays. Entity clustering and labels still exist as internal plumbing because most indicators depend on them (§5.3).
 
+**Chains (updated 2026-11-17)**
+- BNB Chain is deferred by Arthur. It is not ingested or shown until re-enabled. BNB data already stored stays in history.
+
 **Data posture**
 - Use free public APIs where they fit, starting with TEHscreener's API (§4.1).
 - Robinhood Chain has adequate third-party data providers. Do not build a custom indexer for it; identify and use the providers.

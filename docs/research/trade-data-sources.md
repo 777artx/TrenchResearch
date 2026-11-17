@@ -6,8 +6,9 @@ Decided 2026-11-17. Dune has no free API plan, so SPEC §5.1 and §10 now use th
 |---|---|---|---|
 | Google BigQuery public dataset `bigquery-public-data.crypto_solana_mainnet_us` | Solana | Raw `Blocks`, `Transactions`, `Instructions`, `Token Transfers`, `Tokens`, `Accounts`. Current to within minutes (latest block 2026-11-17 22:04 UTC when checked). | Working (service account `claude@genesis-485720`). |
 | Helius RPC and enhanced transactions API | Solana | Per-address transaction history; swaps already decoded (wallet, mints, amounts, venue). | Working. Key injected as `X-Api-Key`. Free plan: 1M credits a month. |
-| Alchemy | Solana, Robinhood Chain (and Base, Ethereum, BNB if enabled) | RPC, including `eth_getLogs` for pool Swap events on Robinhood Chain. | Key valid; networks must be enabled on the Alchemy app. |
-| Public RPCs (publicnode, mainnet.base.org) | Base, Ethereum, BNB | `eth_getLogs` for Swap events on universe pools. | Allowed; not yet wired. |
+| Robinhood Chain public RPC `rpc.mainnet.chain.robinhood.com` | Robinhood Chain | `eth_getLogs` over a full day (842K blocks) for one pool in 0.7 s, no key. | Working. Primary Robinhood trade source. |
+| Alchemy | Solana, Robinhood Chain, Base, Ethereum | General RPC. The free plan limits `eth_getLogs` to a 10-block range, which is about one second of Robinhood blocks, so it is a fallback only. | Working, all networks enabled. |
+| Public RPCs (publicnode, mainnet.base.org) | Base, Ethereum | `eth_getLogs` for Swap events on universe pools. | Allowed; not yet wired. |
 | GeckoTerminal `/pools/{pool}/trades` | All five | Last 300 trades per pool with wallet, side and USD size. | Allowed; not yet wired. |
 
 ## BigQuery cost profile (measured)

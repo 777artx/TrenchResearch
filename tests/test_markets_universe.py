@@ -6,7 +6,7 @@ from trench import universe
 from trench.http import HttpClient
 from trench.ingest import markets
 from trench.lake import Lake
-from trench.pit import PITStore
+from trench.pit import PITStore, Reading
 from trench.rawstore import RawStore
 from trench.sources import dexscreener as dxs
 from trench.sources import geckoterminal as gt
@@ -131,3 +131,16 @@ def test_quote_assets_never_enter_universe(tmp_path):
                                       "fdv_usd": None}],
                run_id="a", fetched_at=datetime(2026, 11, 10, tzinfo=UTC))
     assert universe.build(lake, pit, cutoff=datetime(2026, 11, 11, tzinfo=UTC)) == 0
+
+
+def test_inactive_chain_is_neither_built_nor_read(tmp_path):
+    lake, pit = Lake(tmp_path / "lake"), PITStore(tmp_path / "pub")
+    at = datetime(2026, 11, 10, tzinfo=UTC)
+    row = {"chain": "bnb", "base_token": "0xabc", "pair_address": "0xp",
+           "liquidity_usd": 1e6, "market_cap_usd": 1e8, "fdv_usd": None}
+    lake.write("dxs_pair_snapshot", [row], run_id="a", fetched_at=at)
+    assert universe.build(lake, pit, cutoff=at + timedelta(days=1)) == 0
+    # An entry published while the chain was active stays stored but is not read.
+    pit.publish(universe.METRIC, [Reading("bnb:0xabc", date(2026, 11, 10), 1.0)],
+                formula_version="1", input_cutoff=at, published_at=at)
+    assert "bnb:0xabc" not in universe.members(pit, date(2026, 11, 30))
