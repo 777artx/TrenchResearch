@@ -28,3 +28,11 @@ One day of `Token Transfers` scans about 18.8 GB (dry run for 2026-11-16). The f
 Swaps are reconstructed from token transfers: within one transaction, the trading wallet sends one mint and receives another. Helius's decoded swaps serve as the check on that reconstruction for a sample of transactions.
 
 The decoded Solana DEX datasets announced by Google and Token Terminal are not in this public dataset. Locating them is an open task.
+
+## First Solana extract (2026-11-16, 12:00–13:00 UTC)
+
+- 119 tracked mints (Solana universe tokens plus registered tokens with at least $25K liquidity).
+- 17,979 transactions and 47,917 transfers, for 1.01 GB scanned. A full day is therefore about 24 GB, or about 720 GB a month, which fits the 1 TB free tier with roughly 280 GB a month left for backfill.
+- 71% of selected transactions include a native SOL leg, as expected for pump.fun-style trades. None of the selected transactions contains a transfer without a mint.
+- Known blind spot: a transaction whose only tracked-token leg is a plain `Transfer` (no mint field) is not selected. Its size will be measured against Helius decoded swaps.
+- The `Transactions` table (pre/post token balances with owners) would remove that blind spot but costs about 479 GB a day for the needed columns, so it is not usable on the free tier.

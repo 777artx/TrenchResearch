@@ -465,4 +465,4 @@ CONFIRMED         : AttZ ≥ 2 and FlowZ ≥ 2
 3. Robinhood Chain: choose data providers and confirm coverage of launchpads (PonsFamily, Long, Flap) and terminals.
 4. Social data source and budget for attention vs flow.
 5. Paid data approvals (Allium, Helius, Codex, Birdeye) only if free sources prove insufficient.
-6. Site name, brand and visual direction.
+6. Site name and brand. Visual direction v0 is drafted in `docs/design/DESIGN.md` (Sparsity-like density and structure; institutional navy and slate palette; no gold) and awaits Arthur's review.
