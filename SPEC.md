@@ -125,7 +125,8 @@ What Sparsity does well, worth keeping:
 | Source | Use |
 |---|---|
 | TEHscreener API | Daily launchpad, terminal, chain, DEX aggregates; history backfill; cross-checks |
-| Dune (free tier + API) | Trade-level and wallet-level data; the core source for organic filters, cost basis, cohorts |
+| ~~Dune~~ (no free API; replaced 2026-11-17) | — |
+| Google BigQuery public Solana dataset, Helius, Alchemy, public EVM RPCs, GeckoTerminal trades | Trade-level and wallet-level data; the core source for organic filters, cost basis, cohorts (see `docs/research/trade-data-sources.md`) |
 | DefiLlama | DEX volume, bridge flows, stablecoin supply by chain |
 | DexScreener, GeckoTerminal | Prices, liquidity, pools, OHLCV |
 | Hyperliquid info API | Meme perp funding and open interest |
@@ -428,7 +429,7 @@ CONFIRMED         : AttZ ≥ 2 and FlowZ ≥ 2
 - **Phase 0 — Foundation:**
   - Repo, storage (point-in-time, append-only), scheduler.
   - TEHscreener API ingestion and backfill.
-  - Dune trade-level ingestion for Solana launchpads and DEXes first, then Base, BNB, Ethereum and Robinhood Chain via identified providers.
+  - Trade-level ingestion for Solana launchpads and DEXes first (BigQuery token transfers + Helius), then Base, BNB and Ethereum (RPC Swap logs) and Robinhood Chain (Alchemy RPC, GeckoTerminal trades). Dune was dropped on 2026-11-17: no free API.
   - Price and liquidity from DexScreener/GeckoTerminal.
   - Universe builder.
 - **Phase 1 — Market layer MVP:**
