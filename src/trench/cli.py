@@ -50,6 +50,15 @@ def ingest_markets(
     typer.echo(json.dumps(out, indent=2))
 
 
+@ingest_app.command("defillama")
+def ingest_defillama() -> None:
+    """Daily DEX volume per active chain from DefiLlama (full history)."""
+    from trench.ingest import defillama
+
+    s = Settings.from_env()
+    typer.echo(json.dumps(defillama.run(Lake(s.lake_dir), RawStore(s.raw_dir))))
+
+
 @ingest_app.command("trades")
 def ingest_trades(
     cycles: int = typer.Option(1, help="Polling cycles to run back to back."),
@@ -97,8 +106,10 @@ def daily() -> None:
     """The daily job: TEHscreener, then markets (which reads TEHscreener's top tokens),
     then the universe."""
     ingest_tehcscreener()
+    ingest_defillama()
     ingest_markets(ohlcv_budget=150)
     universe_build()
+    ingest_evm_swaps(chain=["robinhood", "base", "ethereum"], days_back=2.0)
 
 
 @app.command()
