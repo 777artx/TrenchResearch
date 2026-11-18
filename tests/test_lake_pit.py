@@ -109,7 +109,7 @@ def test_changed_rows_keeps_new_and_revised_only(tmp_path):
     assert [r["day"] for r in keep] == [d2, d3]
     lake.write("s", keep, run_id="r2", fetched_at=T1)
     # As of T0 the revision is invisible; afterwards it is the latest version.
-    old = dict(lake.as_of("s", ["day"], as_of=T0).fetchall()[i][:2] for i in range(2))
+    old = {r[0]: r[1] for r in lake.as_of("s", ["day"], as_of=T0).fetchall()}
     assert old[d2] == 2.0
     new = {r[0]: r[1] for r in lake.as_of("s", ["day"]).fetchall()}
     assert new == {d1: 1.0, d2: 2.5, d3: 3.0}

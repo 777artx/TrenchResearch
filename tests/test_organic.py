@@ -51,3 +51,11 @@ def test_high_frequency():
 def test_bot_mm():
     rows = [_sw(i, "mm", 1 if i % 2 else -1, 10 + i, 1000 + i * 600) for i in range(10)]
     assert set(_run(rows).values()) == {"bot_mm"}
+
+
+def test_refuses_swaps_without_timestamps():
+    import pytest
+
+    rows = [_sw(1, "a", 5, 10, 0)]
+    with pytest.raises(ValueError):
+        organic.prepare(pd.DataFrame(rows), {})

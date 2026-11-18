@@ -70,11 +70,14 @@ def decode(log: dict, chain: str) -> dict | None:
         sender, recipient = _addr(topics[2]), None
     else:
         return None
+    # Some RPCs (Robinhood's) return blockTimestamp = 0x0. Zero is never a real
+    # time: store None and resolve from the block (``evm_block_ts``) instead.
     ts = log.get("blockTimestamp")
+    ts = int(ts, 16) if isinstance(ts, str) else ts
     return {
         "chain": chain, "pool_id": pool, "kind": kind,
         "block_number": int(log["blockNumber"], 16),
-        "block_timestamp": int(ts, 16) if isinstance(ts, str) else ts,
+        "block_timestamp": ts or None,
         "tx_hash": log["transactionHash"].lower(), "log_index": int(log["logIndex"], 16),
         "d0": str(d0), "d1": str(d1), "sender": sender, "recipient": recipient,
     }

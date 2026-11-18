@@ -65,8 +65,12 @@ class EvmRPC:
         return body["result"]
 
     def batch(self, method: str, params_list: list[list]) -> list:
+        """One HTTP request, but rate-limited per item: public RPCs (Robinhood's)
+        count each call inside a batch toward their limit."""
         if not params_list:
             return []
+        for _ in range(len(params_list) - 1):
+            self.limiter.acquire()
         body = self._post([{"jsonrpc": "2.0", "id": i, "method": method, "params": p}
                            for i, p in enumerate(params_list)])
         by_id = {b["id"]: b for b in body}

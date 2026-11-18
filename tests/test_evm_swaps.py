@@ -35,3 +35,17 @@ def test_v4_swapper_perspective_kept_and_pool_id_from_topic():
 
 def test_unknown_topic_ignored():
     assert ev.decode(_log(["0x" + "ff" * 32], "0x"), "base") is None
+
+
+def test_zero_timestamp_is_missing_not_epoch():
+    lg = _log([ev.TOPIC_V3, "0x" + "0" * 64, "0x" + "0" * 64], _w(5, -7, 1, 1, 1))
+    lg["blockTimestamp"] = "0x0"
+    assert ev.decode(lg, "robinhood")["block_timestamp"] is None
+
+
+def test_block_time_interpolation():
+    from trench.ingest.evm_swaps import _interpolate
+
+    out = _interpolate([100, 150, 199, 300], {100: 1000, 200: 1010})
+    assert out[100] == 1000 and out[150] == 1005 and out[199] == 1010
+    assert 300 not in out  # outside anchors: left unresolved, never guessed

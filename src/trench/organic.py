@@ -46,8 +46,13 @@ QUOTES = {
 
 
 def prepare(swaps: pd.DataFrame, eth_usd: dict) -> pd.DataFrame:
-    """Add token delta, side, quote and USD value. ``eth_usd``: day -> price."""
+    """Add token delta, side, quote and USD value. ``eth_usd``: day -> price.
+    Rows without a real block timestamp are refused: the time-based rules would
+    otherwise treat them all as simultaneous."""
     df = swaps.copy()
+    ts = pd.to_numeric(df["block_timestamp"], errors="coerce")
+    if ts.isna().any() or (ts <= 0).any():
+        raise ValueError("swaps without block timestamps: join evm_block_ts first")
     is0 = df["token"] == df["token0"]
     d0 = df["d0"].map(int)
     d1 = df["d1"].map(int)
