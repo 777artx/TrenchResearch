@@ -59,7 +59,14 @@ def tracked_pools(lake: Lake, pit: PITStore, chain: str, min_liq: float = 25_000
 
 
 def run(lake: Lake, pit: PITStore, chain: str, *, days_back: float = 2.0,
-        rpc: EvmRPC | None = None, pools: list[dict] | None = None) -> EvmReport:
+        rpc: EvmRPC | None = None, pools: list[dict] | None = None,
+        time_budget_s: float = 480.0) -> EvmReport:
+    """``time_budget_s`` bounds the log scan and the trader lookups separately, so a
+    slow or throttling RPC cannot exhaust the scheduled job's time. Whatever is
+    fetched is saved; the next run resumes from each pool's last stored block."""
+    import time as _time
+
+    deadline = _time.monotonic() + time_budget_s
     rep = EvmReport(run_id=f"evm_{chain}_{utcnow():%Y%m%dT%H%M%S}_{uuid.uuid4().hex[:6]}",
                     chain=chain)
     own = rpc is None
@@ -84,6 +91,9 @@ def run(lake: Lake, pit: PITStore, chain: str, *, days_back: float = 2.0,
     groups = [("pool", other[i : i + GROUP]) for i in range(0, len(other), GROUP)]
     groups += [("v4", v4[i : i + GROUP]) for i in range(0, len(v4), GROUP)]
     for kind, grp in groups:
+        if _time.monotonic() > deadline:
+            rep.errors.append("time budget reached during log scan; resuming next run")
+            break
         start = min(cursor.get(p["pool_id"], default_start - 1) + 1 for p in grp)
         ids = [p["pool_id"] for p in grp]
         if kind == "v4":
@@ -92,6 +102,8 @@ def run(lake: Lake, pit: PITStore, chain: str, *, days_back: float = 2.0,
             address, topics = ids, [evm_swaps.POOL_TOPICS]
         try:
             for logs in rpc.get_logs(start, head, address=address, topics=topics):
+                if _time.monotonic() > deadline:
+                    break
                 for lg in logs:
                     r = evm_swaps.decode(lg, chain)
                     if r is None or r["pool_id"] not in meta:
@@ -131,7 +143,11 @@ def run(lake: Lake, pit: PITStore, chain: str, *, days_back: float = 2.0,
                 {"c": chain}).fetchall()]
         else:
             todo = []
+        lookup_deadline = _time.monotonic() + time_budget_s
         for i in range(0, len(todo), TX_BATCH):
+            if _time.monotonic() > lookup_deadline:
+                rep.errors.append(f"time budget reached at {i}/{len(todo)} tx lookups")
+                break
             batch = todo[i : i + TX_BATCH]
             try:
                 res = rpc.batch("eth_getTransactionByHash", [[h] for h in batch])
