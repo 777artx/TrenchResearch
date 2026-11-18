@@ -1,0 +1,9 @@
+{
+ "by_method": {
+  "eth_blockNumber": 80,
+  "eth_getBlockByNumber": 40,
+  "eth_getLogs": 150,
+  "getSlot": 30
+ },
+ "used": 300.0
+}
