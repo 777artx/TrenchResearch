@@ -103,3 +103,34 @@ class Lake:
         )
         params = {"as_of": as_of} if as_of is not None else {}
         return con.sql(sql, params=params)
+
+
+def changed_rows(lake: Lake, table: str, rows: list[dict], keys: Sequence[str],
+                 ignore: Sequence[str] = ("raw_sha256",)) -> list[dict]:
+    """Rows that are new or differ from the latest stored version of their key.
+
+    Sources such as TEHscreener and DefiLlama return their full history on every
+    call. Storing only changed rows keeps the lake small without losing anything:
+    an unchanged row's latest version is still the right answer for any later
+    cutoff, and a revised row is stored as a new version, so revisions stay visible.
+    """
+    if not rows or table not in lake.tables():
+        return list(rows)
+    new = pa.Table.from_pylist([{**r, "_i": i} for i, r in enumerate(rows)])
+    con = lake.connect()
+    stored_cols = {c for (c,) in con.execute(
+        f"SELECT column_name FROM (DESCRIBE {_check_ident(table)})").fetchall()}
+    cols = [c for c in new.column_names if c not in (*ignore, "_i")]
+    if any(c not in stored_cols for c in cols) or any(k not in cols for k in keys):
+        return list(rows)  # schema grew or keys absent: store everything
+    for k in keys:
+        _check_ident(k)
+    latest = lake.as_of(table, keys).fetch_arrow_table()  # own connection, fully read
+    con.register("_latest", latest)
+    con.register("_new", new)
+    # IS NOT DISTINCT FROM treats NULL = NULL as equal.
+    match = " AND ".join(f'n."{c}" IS NOT DISTINCT FROM l."{c}"' for c in cols)
+    keep = {i for (i,) in con.execute(
+        f"SELECT n._i FROM _new n WHERE NOT EXISTS (SELECT 1 FROM _latest l WHERE {match})"
+    ).fetchall()}
+    return [r for i, r in enumerate(rows) if i in keep]

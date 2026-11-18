@@ -92,3 +92,24 @@ def test_pit_append_only_with_explicit_restatement(tmp_path):
     assert now_v1[0][3] == 40.0 and now_v1[0][8] == "bad price feed on 11-09"
     assert len(pit.read("activity").fetchall()) == 2  # one per formula version
     assert pit.lake.connect().execute("SELECT count(*) FROM activity").fetchone()[0] == 3
+
+
+def test_changed_rows_keeps_new_and_revised_only(tmp_path):
+    from trench.lake import changed_rows
+
+    lake = Lake(tmp_path)
+    d1, d2, d3 = date(2026, 1, 1), date(2026, 1, 2), date(2026, 1, 3)
+    lake.write("s", [{"day": d1, "v": 1.0, "raw_sha256": "a"}, {"day": d2, "v": 2.0,
+                                                                 "raw_sha256": "a"}],
+               run_id="r1", fetched_at=T0)
+    rows = [{"day": d1, "v": 1.0, "raw_sha256": "b"},   # unchanged (only lineage differs)
+            {"day": d2, "v": 2.5, "raw_sha256": "b"},   # revised upstream
+            {"day": d3, "v": 3.0, "raw_sha256": "b"}]   # new
+    keep = changed_rows(lake, "s", rows, ["day"])
+    assert [r["day"] for r in keep] == [d2, d3]
+    lake.write("s", keep, run_id="r2", fetched_at=T1)
+    # As of T0 the revision is invisible; afterwards it is the latest version.
+    old = dict(lake.as_of("s", ["day"], as_of=T0).fetchall()[i][:2] for i in range(2))
+    assert old[d2] == 2.0
+    new = {r[0]: r[1] for r in lake.as_of("s", ["day"]).fetchall()}
+    assert new == {d1: 1.0, d2: 2.5, d3: 3.0}

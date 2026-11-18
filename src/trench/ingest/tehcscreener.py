@@ -16,7 +16,7 @@ from collections.abc import Callable
 from dataclasses import dataclass, field
 
 from trench.http import HttpClient, NotFound
-from trench.lake import Lake
+from trench.lake import Lake, changed_rows
 from trench.rawstore import RawStore
 from trench.sources import tehcscreener as teh
 from trench.timeutil import utcnow
@@ -30,6 +30,26 @@ class RunReport:
     requests: int = 0
     not_found: list[str] = field(default_factory=list)
     rows: dict[str, int] = field(default_factory=dict)
+
+
+# Day-keyed series: only new or revised rows are stored on each run.
+DAY_KEYS = {
+    "teh_launchpad_series": ["chain", "pad", "day"],
+    "teh_launchpad_daily": ["chain", "pad", "day"],
+    "teh_launchpad_revenue": ["chain", "pad", "day"],
+    "teh_bots_by_bot": ["bot", "day"],
+    "teh_bots_by_chain": ["chain", "day"],
+    "teh_bot_chain_daily": ["bot", "chain", "day"],
+    "teh_bot_wallets_dedup": ["bot", "day"],
+    "teh_bot_perps_daily": ["bot", "day"],
+    "teh_chain_daily": ["chain", "day"],
+    "teh_rwa_daily": ["chain", "day"],
+    "teh_dex_daily": ["chain", "dex", "day"],
+    "teh_trench_history": ["day"],
+    "teh_launchpad_profile": ["chain", "pad"],
+    "teh_bot_profile": ["bot"],
+    "teh_trench_method": ["method_json"],
+}
 
 
 def run(lake: Lake, raw: RawStore, client: HttpClient | None = None) -> RunReport:
@@ -126,6 +146,9 @@ def run(lake: Lake, raw: RawStore, client: HttpClient | None = None) -> RunRepor
 
     fetched_at = utcnow()
     for table, rows in sorted(buf.items()):
+        keys = DAY_KEYS.get(table)
+        if keys:
+            rows = changed_rows(lake, table, rows, keys)
         lake.write(table, rows, run_id=run_id, fetched_at=fetched_at)
         report.rows[table] = len(rows)
     log.info("tehcscreener run %s: %d requests, %d tables", run_id, report.requests, len(buf))

@@ -6,7 +6,7 @@
 |---|---|
 | Python 3.13, managed with `uv` | The workload is data engineering and statistics: ingestion, cost-basis accounting, percentile ranks, walk-forward backtests and calibrated models (scikit-learn). Python has the strongest libraries for all of it, and `uv` gives reproducible, fast environments. |
 | Parquet files, queried with DuckDB | Write-once files make the append-only rule physical rather than a convention. DuckDB queries them in place with full SQL and window functions, needs no server, and scales comfortably to the billions of swap rows Phase 2 will need on one machine. Moving to object storage later is a path change, not a rewrite. |
-| Typer CLI as the job runner | Phase 0 has one daily job. A command that cron, a systemd timer or a hosted scheduler can call keeps the choice of hosting open. |
+| Typer CLI, scheduled by GitHub Actions | `trench daily` runs once a day at 05:23 UTC on GitHub's free Actions minutes and commits new data to the append-only `data` branch. It needs no secrets. Continuous Solana trade collection would need an always-on host; that is deferred (Arthur, 2026-11-18). |
 | Static front end (planned, Phase 1) | Published values are produced once a day (hourly later for the Flow Desk). The site can be generated from the point-in-time store and served statically, which is fast, cheap and leaves nothing to compromise. Astro is the likely choice; it will be decided when the first page is built. |
 
 ## Data flow

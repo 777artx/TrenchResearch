@@ -212,6 +212,9 @@ def test_ingest_end_to_end(tmp_path, fixtures):
     assert con.execute(
         "SELECT wallets_dedup FROM teh_bot_wallets_dedup ORDER BY day"
     ).fetchall() == [(None,), (7,)]
-    # a second run adds a new version rather than overwriting
-    ingest.run(lake, raw, client)
-    assert con.execute("SELECT count(DISTINCT run_id) FROM teh_trench_history").fetchone() == (2,)
+    # A second identical run stores no unchanged history, but snapshots are kept.
+    rep2 = ingest.run(lake, raw, client)
+    assert rep2.rows["teh_trench_history"] == 0
+    con = lake.connect()
+    assert con.execute("SELECT count(DISTINCT run_id) FROM teh_trench_history").fetchone() == (1,)
+    assert con.execute("SELECT count(*) FROM teh_status").fetchone() == (2,)

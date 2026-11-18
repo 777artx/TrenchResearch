@@ -5,7 +5,7 @@ from datetime import UTC, date, datetime, timedelta
 
 from trench import chains
 from trench.http import HttpClient, NotFound, UpstreamError
-from trench.lake import Lake
+from trench.lake import Lake, changed_rows
 from trench.rawstore import RawStore
 from trench.sources import defillama as dl
 from trench.timeutil import utcnow
@@ -35,6 +35,7 @@ def run(lake: Lake, raw: RawStore, client: HttpClient | None = None) -> dict:
     finally:
         if own:
             client.close()
+    rows = changed_rows(lake, "llama_dex_daily", rows, ["chain", "day"])
     if rows:
         lake.write("llama_dex_daily", rows, run_id=run_id, fetched_at=utcnow())
     prices = run_prices(lake, raw, run_id)
@@ -60,6 +61,7 @@ def run_prices(lake: Lake, raw: RawStore, run_id: str, start: date = date(2023, 
                 cur += timedelta(days=dl.MAX_POINTS)
     finally:
         client.close()
+    rows = changed_rows(lake, "llama_price_daily", rows, ["asset", "day"])
     if rows:
         lake.write("llama_price_daily", rows, run_id=run_id, fetched_at=utcnow())
     return len(rows)

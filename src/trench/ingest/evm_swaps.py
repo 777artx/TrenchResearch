@@ -22,8 +22,8 @@ from trench.timeutil import utcnow
 log = logging.getLogger(__name__)
 BLOCKS_PER_DAY = {"robinhood": 842_000, "base": 43_200, "ethereum": 7_200}
 GROUP = 20
-TX_BATCH = 20
-MAX_TX_LOOKUPS = 20_000  # per run; the rest carry over
+TX_BATCH = 100  # Robinhood's RPC accepts 100 per batch (200 fails)
+MAX_TX_LOOKUPS = 100_000  # per run; the rest carry over
 
 
 @dataclass
@@ -62,7 +62,7 @@ def run(lake: Lake, pit: PITStore, chain: str, *, days_back: float = 2.0,
     rep = EvmReport(run_id=f"evm_{chain}_{utcnow():%Y%m%dT%H%M%S}_{uuid.uuid4().hex[:6]}",
                     chain=chain)
     own = rpc is None
-    rpc = rpc or EvmRPC(RPC_URLS[chain], per_minute=60)
+    rpc = rpc or EvmRPC(RPC_URLS[chain], per_minute=120)
     pools = pools if pools is not None else tracked_pools(lake, pit, chain)
     rep.pools = len(pools)
     meta = {p["pool_id"]: p for p in pools}

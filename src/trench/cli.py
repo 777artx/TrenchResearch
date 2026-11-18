@@ -103,13 +103,33 @@ def universe_build() -> None:
 
 @app.command()
 def daily() -> None:
-    """The daily job: TEHscreener, then markets (which reads TEHscreener's top tokens),
-    then the universe."""
-    ingest_tehcscreener()
-    ingest_defillama()
-    ingest_markets(ohlcv_budget=150)
-    universe_build()
-    ingest_evm_swaps(chain=["robinhood", "base", "ethereum"], days_back=2.0)
+    """The daily job. Each step runs even if an earlier one failed; the command exits
+    non-zero at the end if any step failed, so the failure shows in GitHub Actions
+    while everything collected is still saved."""
+    import logging
+    import traceback
+
+    steps = [
+        ("tehcscreener", ingest_tehcscreener),
+        ("defillama", ingest_defillama),
+        # markets reads TEHscreener's top tokens, so it runs after it
+        ("markets", lambda: ingest_markets(ohlcv_budget=60)),
+        ("universe", universe_build),
+        ("evm-swaps", lambda: ingest_evm_swaps(chain=["robinhood", "base", "ethereum"],
+                                               days_back=2.0)),
+        ("usage", usage),
+    ]
+    failed = []
+    for name, fn in steps:
+        logging.getLogger("trench.daily").info("step %s", name)
+        try:
+            fn()
+        except Exception:
+            failed.append(name)
+            traceback.print_exc()
+    if failed:
+        typer.echo(f"failed steps: {failed}", err=True)
+        raise typer.Exit(1)
 
 
 @app.command()
