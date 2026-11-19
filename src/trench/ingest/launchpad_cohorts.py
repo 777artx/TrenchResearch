@@ -103,7 +103,11 @@ def pons_cohort(rpc, s, e, horizon, eth_usd: dict, day0: date):
     if L.empty:
         return L, pd.DataFrame()
     tr = pd.DataFrame(LP.pons_trades(rpc, L.to_dict("records"), s, horizon))
-    supplies = rpc.batch("eth_call", [[{"to": t, "data": "0x18160ddd"}, "latest"] for t in L.token])
+    supplies = []
+    toks = L.token.tolist()
+    for i in range(0, len(toks), BLOCK_BATCH):  # the RPC rejects large batches
+        supplies += rpc.batch("eth_call", [[{"to": t, "data": "0x18160ddd"}, "latest"]
+                                           for t in toks[i : i + BLOCK_BATCH]])
     L["supply"] = [int(x, 16) / 1e18 if x else 1e9 for x in supplies]
     bt = _times(rpc, sorted(set(L.block_number) | set(tr.get("block_number", []))))
     L["t0"] = L.block_number.map(bt)
@@ -159,7 +163,8 @@ def pad_summary(outcomes: pd.DataFrame) -> dict:
             "buyret_median": float(ls.buyret.median()) if len(ls) else None}
 
 
-def run_day(lake: Lake, pit: PITStore, day: date) -> dict:
+def run_day(lake: Lake, pit: PITStore, day: date, pads: tuple[str, ...] = ("long", "pons")
+            ) -> dict:
     if day + timedelta(days=8) > utcnow().date():
         raise ValueError(f"cohort {day} needs 7 full days after launch day")
     rpc = EvmRPC(RPC_URLS["robinhood"], per_minute=900)
@@ -170,9 +175,16 @@ def run_day(lake: Lake, pit: PITStore, day: date) -> dict:
         "SELECT day, price_usd FROM llama_price_daily WHERE asset = 'ETH'").fetchall())
     res = {}
     run_id = f"lp_{day:%Y%m%d}_{utcnow():%Y%m%dT%H%M%S}"
-    for pad, fn in ((LP.LONG.name, lambda: long_cohort(rpc, s, e1 - 1, horizon)),
-                    (LP.PONS.name, lambda: pons_cohort(rpc, s, e1 - 1, horizon, eth, day))):
-        L, tr = fn()
+    jobs = {"long": (LP.LONG.name, lambda: long_cohort(rpc, s, e1 - 1, horizon)),
+            "pons": (LP.PONS.name, lambda: pons_cohort(rpc, s, e1 - 1, horizon, eth, day))}
+    for key in pads:
+        pad, fn = jobs[key]
+        try:
+            L, tr = fn()
+        except Exception as exc:  # one pad failing must not lose the others
+            log.exception("cohort %s %s failed", pad, day)
+            res[pad] = {"error": str(exc)[:200]}
+            continue
         if L.empty:
             continue
         sc = LP.score_launches(L, tr) if len(tr) else pd.DataFrame({"token": L.token})
