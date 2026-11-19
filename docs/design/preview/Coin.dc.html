@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Trench Research — Coin page layout</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&amp;family=IBM+Plex+Sans:wght@400;500;600&amp;family=Source+Serif+4:opsz,wght@8..60,500;8..60,600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#F7F8FA}
+a{color:#1F4E79}a:hover{color:#0B1F3A}
+</style>
+</helmet>
+<div style="font-family: 'IBM Plex Sans', system-ui, sans-serif; color: #334155; background: #F7F8FA; min-height: 100vh">
+  <header style="background: #0B1F3A; color: #FFFFFF">
+    <div style="max-width: 1200px; margin: 0 auto; padding: 14px 24px; display: flex; flex-wrap: wrap; gap: 16px 32px; align-items: center; justify-content: space-between">
+      <div style="font-family: 'Source Serif 4', Georgia, serif; font-size: 20px; font-weight: 600">Trench Research</div>
+      <nav style="display: flex; flex-wrap: wrap; gap: 4px 24px; font-size: 14px">
+        <a href="Main.dc.html" style="color: #C7D2E0; text-decoration: none; padding: 6px 0">Market</a>
+        <a href="Launchpads.dc.html" style="color: #C7D2E0; text-decoration: none; padding: 6px 0">Launchpads</a>
+        <a href="Coin.dc.html" style="color: #FFFFFF; text-decoration: none; border-bottom: 2px solid #FFFFFF; padding: 6px 0">Coins</a>
+        <a href="#" style="color: #C7D2E0; text-decoration: none; padding: 6px 0">Track record</a>
+        <a href="#" style="color: #C7D2E0; text-decoration: none; padding: 6px 0">Methodology</a>
+      </nav>
+      <div style="font-size: 12px; color: #C7D2E0">Layout preview: Phase 2, no data yet</div>
+    </div>
+  </header>
+
+  <main style="max-width: 1200px; margin: 0 auto; padding: 40px 24px 64px; display: flex; flex-direction: column; gap: 28px">
+    <article style="background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 6px; padding: 28px; display: flex; flex-direction: column; gap: 20px">
+      <div style="display: flex; flex-wrap: wrap; gap: 8px 20px; align-items: baseline">
+        <h1 style="margin: 0; font-family: 'Source Serif 4', Georgia, serif; font-size: 34px; font-weight: 600; color: #0B1F3A">[COIN NAME]</h1>
+        <span style="font-family: 'IBM Plex Mono', monospace; font-size: 15px; color: #556477">[market cap] · [chain] / [launchpad]</span>
+      </div>
+      <div style="display: flex; flex-wrap: wrap; gap: 12px 28px; align-items: center; padding: 16px 20px; background: #F7F8FA; border-radius: 4px">
+        <div style="display: flex; flex-direction: column; gap: 2px"><span style="font-size: 12px; color: #556477; text-transform: uppercase; letter-spacing: 0.5px">Setup</span><span style="font-size: 22px; font-weight: 600; color: #0B1F3A">[Accumulation | Distribution risk | Speculative bid | Avoid]</span></div>
+        <div style="display: flex; flex-direction: column; gap: 2px"><span style="font-size: 12px; color: #556477; text-transform: uppercase; letter-spacing: 0.5px">Quality</span><span style="font-family: 'IBM Plex Mono', monospace; font-size: 22px; color: #0B1F3A">[0–100] (#[rank])</span></div>
+        <div style="display: flex; flex-direction: column; gap: 2px"><span style="font-size: 12px; color: #556477; text-transform: uppercase; letter-spacing: 0.5px">Flow</span><span style="font-family: 'IBM Plex Mono', monospace; font-size: 22px; color: #0B1F3A">[±σ]</span></div>
+        <span style="font-size: 13px; color: #556477">[changed from X, N days ago]</span>
+      </div>
+      <dl style="margin: 0; display: grid; grid-template-columns: minmax(80px, 140px) minmax(0, 1fr); gap: 14px 20px; font-size: 15px; line-height: 1.5">
+        <sc-for list="{{rows}}" as="r" hint-placeholder-count="5">
+          <dt style="font-weight: 600; color: #0B1F3A">{{r.k}}</dt>
+          <dd style="margin: 0">{{r.v}}</dd>
+        </sc-for>
+      </dl>
+    </article>
+
+    <section style="display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 16px">
+      <sc-for list="{{panels}}" as="p" hint-placeholder-count="4">
+        <div style="background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 6px; padding: 20px; display: flex; flex-direction: column; gap: 10px">
+          <h2 style="margin: 0; font-size: 16px; font-weight: 600; color: #0B1F3A">{{p.t}}</h2>
+          <div style="height: 120px; border: 1px dashed #C9D3DF; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 13px; color: #556477; padding: 0 16px; text-align: center">{{p.box}}</div>
+          <p style="margin: 0; font-size: 14px; line-height: 1.5">{{p.d}}</p>
+        </div>
+      </sc-for>
+    </section>
+  </main>
+
+  <footer style="border-top: 1px solid #E2E8F0; background: #FFFFFF">
+    <div style="max-width: 1200px; margin: 0 auto; padding: 24px; font-size: 13px; color: #556477">
+      <span style="font-weight: 600; color: #334155">Research, not financial advice.</span>
+    </div>
+  </footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":1500}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {
+      rows: [
+        { k: 'Why', v: 'One sentence naming the three biggest drivers, for example how much supply survived the last drawdown and whether smart wallets are adding.' },
+        { k: 'Risk', v: 'Share of supply held by insiders · how much of the top holders could exit within 5% price impact · current drawdown from the high.' },
+        { k: 'Levels', v: 'Resistance where many holders bought and may sell to break even · support where buyers absorbed selling before.' },
+        { k: 'Odds', v: 'For coins in this same state in the past: median 14-day return, chance of falling 50% within 30 days, and how many coins that is based on.' },
+        { k: 'Flips', v: 'The exact conditions that would change the setup, for example insiders selling more than a stated share of supply.' }
+      ],
+      panels: [
+        { t: 'Price, shaded by setup', box: 'Price chart with each period shaded by the setup it was in', d: 'Shows how long each setup lasted and what price did during it.' },
+        { t: 'Who is buying', box: 'Net buying by smart wallets, whales, insiders, new wallets and retail, scaled by market cap', d: 'Ranked against the coin’s own history, never by raw dollars.' },
+        { t: 'Where holders bought', box: 'Supply held at each purchase price, with the share now in profit', d: 'Clusters of holders at a loss mark likely selling pressure on the way up.' },
+        { t: 'Bottom probability (in drawdown only)', box: 'Probability of a 50% bounce before a stop 25% under the low, against the base rate', d: 'Appears only for coins at least 50% below their 90-day high.' }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

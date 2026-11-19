@@ -31,5 +31,6 @@ The scorecard view will therefore show raw counts and rates with their sample si
 ## Gaps to close
 
 - 55 PonsFamily tokens left their bonding curve within 7 days (17 of them L*). For 31 of the 55, GeckoTerminal returned no data (rate limiting), so their post-curve survival and peak are missing and Surv7 and Runner are understated. The fix is to fetch these candles in the daily job at a slower pace with retries.
+- Launch coverage: TEHscreener counts 1,008 PonsFamily launches on 2026-11-11, against 859 found from the factory's launch event. About 15% of launches likely come through a second factory or a newer contract version, which is being traced. Long.xyz matches TEHscreener exactly (147).
 - Flap (Robinhood) and thestonks.exchange (Base) are not yet included.
 - Long.xyz quote-token prices are current DexScreener prices, not daily.

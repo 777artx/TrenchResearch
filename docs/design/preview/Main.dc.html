@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Trench Research — Market</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&amp;family=IBM+Plex+Sans:wght@400;500;600&amp;family=Source+Serif+4:opsz,wght@8..60,500;8..60,600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#F7F8FA}
+a{color:#1F4E79}a:hover{color:#0B1F3A}
+</style>
+</helmet>
+<div style="font-family: 'IBM Plex Sans', system-ui, sans-serif; color: #334155; background: #F7F8FA; min-height: 100vh">
+  <header style="background: #0B1F3A; color: #FFFFFF">
+    <div style="max-width: 1200px; margin: 0 auto; padding: 14px 24px; display: flex; flex-wrap: wrap; gap: 16px 32px; align-items: center; justify-content: space-between">
+      <div style="font-family: 'Source Serif 4', Georgia, serif; font-size: 20px; font-weight: 600; letter-spacing: 0.2px">Trench Research</div>
+      <nav style="display: flex; flex-wrap: wrap; gap: 4px 24px; font-size: 14px">
+        <a href="Main.dc.html" style="color: #FFFFFF; text-decoration: none; border-bottom: 2px solid #FFFFFF; padding: 6px 0">Market</a>
+        <a href="Launchpads.dc.html" style="color: #C7D2E0; text-decoration: none; padding: 6px 0">Launchpads</a>
+        <a href="Coin.dc.html" style="color: #C7D2E0; text-decoration: none; padding: 6px 0">Coins</a>
+        <a href="#" style="color: #C7D2E0; text-decoration: none; padding: 6px 0">Track record</a>
+        <a href="#" style="color: #C7D2E0; text-decoration: none; padding: 6px 0">Methodology</a>
+      </nav>
+      <div style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #C7D2E0">Data as of 16 Nov 2026, 24:00 UTC</div>
+    </div>
+  </header>
+
+  <main style="max-width: 1200px; margin: 0 auto; padding: 40px 24px 64px; display: flex; flex-direction: column; gap: 40px">
+    <section style="display: flex; flex-direction: column; gap: 12px">
+      <h1 style="margin: 0; font-family: 'Source Serif 4', Georgia, serif; font-size: 40px; font-weight: 600; color: #0B1F3A; line-height: 1.15">The market, chain by chain</h1>
+      <p style="margin: 0; max-width: 760px; font-size: 17px; line-height: 1.6">Each reading below states what it shows today and whether it has earned the right to be read as a signal. A reading that failed its backtest is shown as description only, and the page says why.</p>
+      <div style="display: flex; flex-wrap: wrap; gap: 8px 20px; margin-top: 8px; font-size: 13px">
+        <span style="display: flex; align-items: center; gap: 8px"><span style="padding: 2px 8px; border-radius: 3px; background: #E3EEE8; color: #1F5C43; font-weight: 600">Signal</span>passed its backtest out of sample</span>
+        <span style="display: flex; align-items: center; gap: 8px"><span style="padding: 2px 8px; border-radius: 3px; background: #F1E6E0; color: #8A3E1C; font-weight: 600">Description only</span>failed its backtest</span>
+        <span style="display: flex; align-items: center; gap: 8px"><span style="padding: 2px 8px; border-radius: 3px; background: #E7ECF3; color: #1F4E79; font-weight: 600">Not yet validated</span>too little history to test</span>
+      </div>
+    </section>
+
+    <section style="display: flex; flex-direction: column; gap: 16px">
+      <div style="display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: baseline; justify-content: space-between">
+        <h2 style="margin: 0; font-family: 'Source Serif 4', Georgia, serif; font-size: 26px; font-weight: 600; color: #0B1F3A">Activity: how busy each chain is against its own year</h2>
+        <span style="padding: 2px 8px; border-radius: 3px; background: #F1E6E0; color: #8A3E1C; font-size: 13px; font-weight: 600">Description only</span>
+      </div>
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px">
+        <sc-for list="{{chains}}" as="c" hint-placeholder-count="4">
+          <article style="background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 6px; padding: 20px; display: flex; flex-direction: column; gap: 14px">
+            <div style="display: flex; justify-content: space-between; align-items: baseline">
+              <h3 style="margin: 0; font-size: 17px; font-weight: 600; color: #0B1F3A">{{c.name}}</h3>
+              <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #556477">{{c.trend}}</span>
+            </div>
+            <div style="display: flex; align-items: baseline; gap: 10px">
+              <span style="font-family: 'IBM Plex Mono', monospace; font-size: 40px; font-weight: 500; color: #0B1F3A">{{c.score}}</span>
+              <span style="font-size: 14px; font-weight: 600; color: {{c.stateColor}}">{{c.state}}</span>
+            </div>
+            <sc-if value="{{c.scored}}" hint-placeholder-val="{{ true }}">
+              <div style="display: flex; flex-direction: column; gap: 8px; font-size: 13px">
+                <div style="display: flex; flex-direction: column; gap: 4px">
+                  <div style="display: flex; justify-content: space-between"><span>Volume, in SOL or ETH</span><span style="font-family: 'IBM Plex Mono', monospace">{{c.v}}th pct</span></div>
+                  <div style="height: 6px; background: #E2E8F0; border-radius: 3px"><div style="height: 6px; border-radius: 3px; background: #1F4E79; width: {{c.vw}}"></div></div>
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 4px">
+                  <div style="display: flex; justify-content: space-between"><span>Active wallets</span><span style="font-family: 'IBM Plex Mono', monospace">{{c.p}}</span></div>
+                  <div style="height: 6px; background: #E2E8F0; border-radius: 3px"><div style="height: 6px; border-radius: 3px; background: #2F6F73; width: {{c.pw}}"></div></div>
+                </div>
+              </div>
+            </sc-if>
+            <p style="margin: 0; font-size: 14px; line-height: 1.5">{{c.note}}</p>
+          </article>
+        </sc-for>
+      </div>
+      <p style="margin: 0; font-size: 14px; line-height: 1.6; max-width: 900px; color: #475569">Why description only: from July 2023 to November 2026, the top fifth of readings was not followed by better 14-day returns than the bottom fifth (+3.8%, 95% interval −3.6% to +12.4%), and the hot or cold state lasted a median of four days, below the five-day minimum. This version uses raw volume; the organic version is tested once it has enough history.</p>
+    </section>
+
+    <section style="display: flex; flex-direction: column; gap: 16px">
+      <div style="display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: baseline; justify-content: space-between">
+        <h2 style="margin: 0; font-family: 'Source Serif 4', Georgia, serif; font-size: 26px; font-weight: 600; color: #0B1F3A">Chain rotation: who is gaining share of trading</h2>
+        <span style="padding: 2px 8px; border-radius: 3px; background: #F1E6E0; color: #8A3E1C; font-size: 13px; font-weight: 600">Description only</span>
+      </div>
+      <div style="background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 6px; overflow-x: auto">
+        <table style="width: 100%; border-collapse: collapse; font-size: 14px; min-width: 640px">
+          <thead>
+            <tr style="text-align: left; color: #556477; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px">
+              <th style="padding: 12px 20px; font-weight: 600; border-bottom: 1px solid #E2E8F0">Chain</th>
+              <th style="padding: 12px 20px; font-weight: 600; border-bottom: 1px solid #E2E8F0; text-align: right">Share of DEX volume</th>
+              <th style="padding: 12px 20px; font-weight: 600; border-bottom: 1px solid #E2E8F0; text-align: right">Relative strength</th>
+              <th style="padding: 12px 20px; font-weight: 600; border-bottom: 1px solid #E2E8F0; text-align: right">Momentum</th>
+              <th style="padding: 12px 20px; font-weight: 600; border-bottom: 1px solid #E2E8F0">Quadrant (confirmed)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <sc-for list="{{rotation}}" as="r" hint-placeholder-count="4">
+              <tr>
+                <td style="padding: 12px 20px; border-bottom: 1px solid #EEF2F6; font-weight: 600; color: #0B1F3A">{{r.name}}</td>
+                <td style="padding: 12px 20px; border-bottom: 1px solid #EEF2F6; text-align: right; font-family: 'IBM Plex Mono', monospace">{{r.share}}</td>
+                <td style="padding: 12px 20px; border-bottom: 1px solid #EEF2F6; text-align: right; font-family: 'IBM Plex Mono', monospace">{{r.ratio}}</td>
+                <td style="padding: 12px 20px; border-bottom: 1px solid #EEF2F6; text-align: right; font-family: 'IBM Plex Mono', monospace">{{r.mom}}</td>
+                <td style="padding: 12px 20px; border-bottom: 1px solid #EEF2F6">{{r.quad}}</td>
+              </tr>
+            </sc-for>
+          </tbody>
+        </table>
+      </div>
+      <p style="margin: 0; font-size: 14px; line-height: 1.6; max-width: 900px; color: #475569">Why description only: over 505 chain-weeks since September 2023, chains labelled Leading lost share over the next 14 days relative to chains labelled Lagging (−9.8%, 95% interval −19.3% to −3.5%). Trading share has reverted rather than trended, so this table does not suggest rotating into the leader.</p>
+    </section>
+
+    <section style="display: flex; flex-direction: column; gap: 16px">
+      <div style="display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: baseline; justify-content: space-between">
+        <h2 style="margin: 0; font-family: 'Source Serif 4', Georgia, serif; font-size: 26px; font-weight: 600; color: #0B1F3A">How much of the activity is real</h2>
+        <span style="padding: 2px 8px; border-radius: 3px; background: #E7ECF3; color: #1F4E79; font-size: 13px; font-weight: 600">Not yet validated</span>
+      </div>
+      <div style="display: flex; flex-wrap: wrap; gap: 16px">
+        <div style="flex: 1 1 320px; background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 6px; padding: 24px; display: flex; flex-direction: column; gap: 16px">
+          <div style="font-size: 13px; color: #556477">Robinhood Chain, 44 tracked coins, 17 Nov 2026 16:50 to 22:50 UTC, 19,770 swaps</div>
+          <div style="display: flex; flex-wrap: wrap; gap: 32px">
+            <div style="display: flex; flex-direction: column; gap: 4px"><span style="font-family: 'IBM Plex Mono', monospace; font-size: 40px; font-weight: 500; color: #0B1F3A">54%</span><span style="font-size: 14px">of swaps are organic</span></div>
+            <div style="display: flex; flex-direction: column; gap: 4px"><span style="font-family: 'IBM Plex Mono', monospace; font-size: 40px; font-weight: 500; color: #0B1F3A">83%</span><span style="font-size: 14px">of dollar volume is organic</span></div>
+          </div>
+          <p style="margin: 0; font-size: 14px; line-height: 1.6">Automated flow makes up close to half of all swaps but about a sixth of the dollars. Raw trade counts overstate activity roughly twofold, which is why trade counts are not used anywhere on this site.</p>
+        </div>
+        <div style="flex: 1 1 320px; background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 6px; padding: 24px; display: flex; flex-direction: column; gap: 12px">
+          <div style="font-size: 13px; color: #556477">Swaps removed, by reason</div>
+          <sc-for list="{{reasons}}" as="x" hint-placeholder-count="4">
+            <div style="display: flex; flex-direction: column; gap: 4px; font-size: 14px">
+              <div style="display: flex; justify-content: space-between"><span>{{x.label}}</span><span style="font-family: 'IBM Plex Mono', monospace">{{x.n}}</span></div>
+              <div style="height: 6px; background: #E2E8F0; border-radius: 3px"><div style="height: 6px; border-radius: 3px; background: #475569; width: {{x.w}}"></div></div>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer style="border-top: 1px solid #E2E8F0; background: #FFFFFF">
+    <div style="max-width: 1200px; margin: 0 auto; padding: 24px; display: flex; flex-wrap: wrap; gap: 8px 32px; justify-content: space-between; font-size: 13px; color: #556477">
+      <span style="font-weight: 600; color: #334155">Research, not financial advice.</span>
+      <span>Sources: tehcscreener.com, DefiLlama, GeckoTerminal, DexScreener, and on-chain data from public RPCs.</span>
+    </div>
+  </footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":2350}}'>
+class Component extends DCLogic {
+  renderVals() {
+    var hot = '#2E7D5B', cold = '#1F4E79';
+    return {
+      chains: [
+        { name: 'Ethereum', score: '82', state: 'Hot', stateColor: hot, trend: '−4.4 vs 7 days ago', scored: true, v: '82', vw: '82%', p: 'not covered', pw: '0%', note: 'Volume is in the top fifth of the past year. Active-wallet data is not available for Ethereum.' },
+        { name: 'Base', score: '53', state: 'Hot', stateColor: hot, trend: '−10.8 vs 7 days ago', scored: true, v: '89', vw: '89%', p: '17th pct', pw: '17%', note: 'Dollars are high but wallets are low: volume ranks at the 89th percentile and active wallets at the 17th. Activity is likely bot-heavy.' },
+        { name: 'Solana', score: '19', state: 'Cold', stateColor: cold, trend: '−1.8 vs 7 days ago', scored: true, v: '23', vw: '23%', p: '16th pct', pw: '16%', note: 'Both volume and wallets sit in the bottom quarter of the past year.' },
+        { name: 'Robinhood Chain', score: '—', state: 'Not scored', stateColor: '#556477', trend: '159 of 180 days', scored: false, v: '', vw: '0%', p: '', pw: '0%', note: 'Robinhood Chain needs 180 days of history before it can be ranked against its own year. It qualifies in early December.' }
+      ],
+      rotation: [
+        { name: 'Ethereum', share: '32.9%', ratio: '107.6', mom: '92.3', quad: 'Weakening' },
+        { name: 'Solana', share: '31.4%', ratio: '87.6', mom: '103.0', quad: 'Lagging (turning to Improving)' },
+        { name: 'Base', share: '22.7%', ratio: '114.0', mom: '102.5', quad: 'Leading' },
+        { name: 'Robinhood Chain', share: '13.1%', ratio: '90.6', mom: '103.5', quad: 'Lagging (turning to Improving)' }
+      ],
+      reasons: [
+        { label: 'High-frequency wallets (more than 5 swaps a minute)', n: '7,731', w: '85%' },
+        { label: 'Bot or market-maker flow (two-sided, no net position)', n: '897', w: '10%' },
+        { label: 'Atomic arbitrage', n: '449', w: '5%' },
+        { label: 'Same-block round trips', n: '2', w: '1%' }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Trench Research — Launchpads</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&amp;family=IBM+Plex+Sans:wght@400;500;600&amp;family=Source+Serif+4:opsz,wght@8..60,500;8..60,600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#F7F8FA}
+a{color:#1F4E79}a:hover{color:#0B1F3A}
+</style>
+</helmet>
+<div style="font-family: 'IBM Plex Sans', system-ui, sans-serif; color: #334155; background: #F7F8FA; min-height: 100vh">
+  <header style="background: #0B1F3A; color: #FFFFFF">
+    <div style="max-width: 1200px; margin: 0 auto; padding: 14px 24px; display: flex; flex-wrap: wrap; gap: 16px 32px; align-items: center; justify-content: space-between">
+      <div style="font-family: 'Source Serif 4', Georgia, serif; font-size: 20px; font-weight: 600">Trench Research</div>
+      <nav style="display: flex; flex-wrap: wrap; gap: 4px 24px; font-size: 14px">
+        <a href="Main.dc.html" style="color: #C7D2E0; text-decoration: none; padding: 6px 0">Market</a>
+        <a href="Launchpads.dc.html" style="color: #FFFFFF; text-decoration: none; border-bottom: 2px solid #FFFFFF; padding: 6px 0">Launchpads</a>
+        <a href="Coin.dc.html" style="color: #C7D2E0; text-decoration: none; padding: 6px 0">Coins</a>
+        <a href="#" style="color: #C7D2E0; text-decoration: none; padding: 6px 0">Track record</a>
+        <a href="#" style="color: #C7D2E0; text-decoration: none; padding: 6px 0">Methodology</a>
+      </nav>
+      <div style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #C7D2E0">Cohort: launches on 11 Nov 2026 UTC</div>
+    </div>
+  </header>
+
+  <main style="max-width: 1200px; margin: 0 auto; padding: 40px 24px 64px; display: flex; flex-direction: column; gap: 32px">
+    <section style="display: flex; flex-direction: column; gap: 12px">
+      <h1 style="margin: 0; font-family: 'Source Serif 4', Georgia, serif; font-size: 40px; font-weight: 600; color: #0B1F3A; line-height: 1.15">Launchpads: what happens to the people who buy</h1>
+      <p style="margin: 0; max-width: 780px; font-size: 17px; line-height: 1.6">Launch counts reward spam. This page follows every launch for seven days and counts outcomes instead: whether real buyers showed up, whether the coin reached $100K, whether it was still alive a week later, and whether the creator sold into the first buyers.</p>
+    </section>
+
+    <div style="display: flex; gap: 12px; align-items: flex-start; background: #E7ECF3; border-radius: 6px; padding: 16px 20px; font-size: 14px; line-height: 1.6; color: #0B1F3A">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1F4E79" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none; margin-top: 2px"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="11" x2="12" y2="16"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+      <span><strong>Not ranked yet.</strong> A fair ranking needs at least four launchpads and four weekly cohorts, so this page shows raw outcomes with their sample sizes. Each figure is not yet validated.</span>
+    </div>
+
+    <section style="display: flex; flex-direction: column; gap: 16px">
+      <h2 style="margin: 0; font-family: 'Source Serif 4', Georgia, serif; font-size: 26px; font-weight: 600; color: #0B1F3A">Outcomes, launch by launch</h2>
+      <div style="background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 6px; overflow-x: auto">
+        <table style="width: 100%; border-collapse: collapse; font-size: 14px; min-width: 620px">
+          <thead>
+            <tr style="text-align: left; color: #556477; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px">
+              <th style="padding: 12px 20px; font-weight: 600; border-bottom: 1px solid #E2E8F0">Measure</th>
+              <th style="padding: 12px 20px; font-weight: 600; border-bottom: 1px solid #E2E8F0; text-align: right">Long.xyz</th>
+              <th style="padding: 12px 20px; font-weight: 600; border-bottom: 1px solid #E2E8F0; text-align: right">PonsFamily</th>
+            </tr>
+          </thead>
+          <tbody>
+            <sc-for list="{{rows}}" as="r" hint-placeholder-count="9">
+              <tr>
+                <td style="padding: 11px 20px; border-bottom: 1px solid #EEF2F6">{{r.m}}</td>
+                <td style="padding: 11px 20px; border-bottom: 1px solid #EEF2F6; text-align: right; font-family: 'IBM Plex Mono', monospace; color: #0B1F3A">{{r.a}}</td>
+                <td style="padding: 11px 20px; border-bottom: 1px solid #EEF2F6; text-align: right; font-family: 'IBM Plex Mono', monospace; color: #0B1F3A">{{r.b}}</td>
+              </tr>
+            </sc-for>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section style="display: flex; flex-direction: column; gap: 16px">
+      <h2 style="margin: 0; font-family: 'Source Serif 4', Georgia, serif; font-size: 26px; font-weight: 600; color: #0B1F3A">The funnel</h2>
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px">
+        <sc-for list="{{funnels}}" as="f" hint-placeholder-count="2">
+          <article style="background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 6px; padding: 20px; display: flex; flex-direction: column; gap: 12px">
+            <h3 style="margin: 0; font-size: 17px; font-weight: 600; color: #0B1F3A">{{f.name}}</h3>
+            <sc-for list="{{f.steps}}" as="s" hint-placeholder-count="5">
+              <div style="display: flex; flex-direction: column; gap: 4px; font-size: 13px">
+                <div style="display: flex; justify-content: space-between"><span>{{s.label}}</span><span style="font-family: 'IBM Plex Mono', monospace; color: #0B1F3A">{{s.n}}</span></div>
+                <div style="height: 10px; background: #EEF2F6; border-radius: 2px"><div style="height: 10px; border-radius: 2px; background: #1F4E79; width: {{s.w}}; min-width: 2px"></div></div>
+              </div>
+            </sc-for>
+            <p style="margin: 0; font-size: 14px; line-height: 1.5">{{f.read}}</p>
+          </article>
+        </sc-for>
+      </div>
+    </section>
+
+    <section style="display: flex; flex-direction: column; gap: 16px">
+      <h2 style="margin: 0; font-family: 'Source Serif 4', Georgia, serif; font-size: 26px; font-weight: 600; color: #0B1F3A">Other launchpads that day</h2>
+      <p style="margin: 0; font-size: 14px; line-height: 1.6; max-width: 860px; color: #475569">Launch-level outcomes are not yet measured for these launchpads. Daily totals come from tehcscreener.com. Counts alone do not show quality, which is why they are kept off the main table.</p>
+      <div style="background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 6px; overflow-x: auto">
+        <table style="width: 100%; border-collapse: collapse; font-size: 14px; min-width: 560px">
+          <thead>
+            <tr style="text-align: left; color: #556477; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px">
+              <th style="padding: 12px 20px; font-weight: 600; border-bottom: 1px solid #E2E8F0">Launchpad</th>
+              <th style="padding: 12px 20px; font-weight: 600; border-bottom: 1px solid #E2E8F0">Chain</th>
+              <th style="padding: 12px 20px; font-weight: 600; border-bottom: 1px solid #E2E8F0; text-align: right">Launches</th>
+              <th style="padding: 12px 20px; font-weight: 600; border-bottom: 1px solid #E2E8F0; text-align: right">Volume</th>
+              <th style="padding: 12px 20px; font-weight: 600; border-bottom: 1px solid #E2E8F0">Launch outcomes</th>
+            </tr>
+          </thead>
+          <tbody>
+            <sc-for list="{{others}}" as="o" hint-placeholder-count="5">
+              <tr>
+                <td style="padding: 11px 20px; border-bottom: 1px solid #EEF2F6; font-weight: 600; color: #0B1F3A">{{o.pad}}</td>
+                <td style="padding: 11px 20px; border-bottom: 1px solid #EEF2F6">{{o.chain}}</td>
+                <td style="padding: 11px 20px; border-bottom: 1px solid #EEF2F6; text-align: right; font-family: 'IBM Plex Mono', monospace">{{o.n}}</td>
+                <td style="padding: 11px 20px; border-bottom: 1px solid #EEF2F6; text-align: right; font-family: 'IBM Plex Mono', monospace">{{o.v}}</td>
+                <td style="padding: 11px 20px; border-bottom: 1px solid #EEF2F6; color: #556477">{{o.s}}</td>
+              </tr>
+            </sc-for>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section style="display: flex; flex-direction: column; gap: 8px; font-size: 13px; line-height: 1.6; color: #475569; max-width: 900px">
+      <h2 style="margin: 0 0 4px; font-size: 15px; font-weight: 600; color: #0B1F3A">Method and known gaps</h2>
+      <p style="margin: 0">A real launch has at least ten different wallets, other than the creator, buying in its first hour. Market cap uses the launch's fixed supply. Buyer return compares the price 24 hours after launch with the average first-hour buy price.</p>
+      <p style="margin: 0">PonsFamily survival and $1M counts are understated: 31 of the 55 coins that left their bonding curve had no price data available afterwards. TEHscreener counts 1,008 PonsFamily launches that day against 859 found on chain, so a second launch contract is being traced.</p>
+    </section>
+  </main>
+
+  <footer style="border-top: 1px solid #E2E8F0; background: #FFFFFF">
+    <div style="max-width: 1200px; margin: 0 auto; padding: 24px; display: flex; flex-wrap: wrap; gap: 8px 32px; justify-content: space-between; font-size: 13px; color: #556477">
+      <span style="font-weight: 600; color: #334155">Research, not financial advice.</span>
+      <span>Sources: on-chain data from Robinhood Chain's public RPC; GeckoTerminal; DexScreener; tehcscreener.com.</span>
+    </div>
+  </footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":1900}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {
+      rows: [
+        { m: 'Launches', a: '147', b: '859' },
+        { m: 'Different creator wallets', a: '20', b: '764' },
+        { m: 'Spam: launches without real early buyers', a: '98%', b: '71%' },
+        { m: 'Real launches (10+ buyers in the first hour)', a: '3', b: '248' },
+        { m: 'Reached $100K within 24 hours', a: '0 of 3', b: '8 of 248' },
+        { m: 'Above $50K after 7 days', a: '0 of 3', b: '5 of 248 (understated)' },
+        { m: 'Reached $1M within 7 days', a: '0 of 3', b: '1 of 248 (understated)' },
+        { m: 'Creator sold into the first hour', a: '0 of 3', b: '140 of 248 (56%)' },
+        { m: 'Typical early buyer after 24 hours', a: '−10.6%', b: '−26.7%' }
+      ],
+      funnels: [
+        { name: 'Long.xyz', read: 'Almost every launch came from a handful of wallets and never traded. None of the three real launches reached $100K.',
+          steps: [ { label: 'Launched', n: '147', w: '100%' }, { label: 'Real early buyers', n: '3', w: '2%' }, { label: 'Reached $100K in 24 hours', n: '0', w: '0%' }, { label: 'Above $50K at day 7', n: '0', w: '0%' }, { label: 'Reached $1M', n: '0', w: '0%' } ] },
+        { name: 'PonsFamily', read: 'Three in ten launches drew real buyers, but the creator sold into more than half of those within the hour, and the typical early buyer was down 27% a day later.',
+          steps: [ { label: 'Launched', n: '859', w: '100%' }, { label: 'Real early buyers', n: '248', w: '28.9%' }, { label: 'Reached $100K in 24 hours', n: '8', w: '0.9%' }, { label: 'Above $50K at day 7', n: '5', w: '0.6%' }, { label: 'Reached $1M', n: '1', w: '0.1%' } ] }
+      ],
+      others: [
+        { pad: 'pump.fun', chain: 'Solana', n: '42,369', v: '$403.6M', s: 'Totals only; needs paid Solana data' },
+        { pad: 'stonkfun', chain: 'Solana', n: '448', v: '$16.9M', s: 'Totals only; needs paid Solana data' },
+        { pad: 'letsbonk', chain: 'Solana', n: '39', v: '$2.6M', s: 'Totals only; needs paid Solana data' },
+        { pad: 'Flap', chain: 'Robinhood Chain', n: '276', v: '$0.1M', s: 'Next to be added' },
+        { pad: 'thestonks.exchange', chain: 'Base', n: '3', v: '$0.2M', s: 'Next to be added' }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>
