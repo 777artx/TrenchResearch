@@ -36,6 +36,12 @@ jobs:
       - name: Install dependencies
         run: uv sync --frozen
 
+      - name: Install headless browser for the GMGN collector
+        working-directory: tools/gmgn
+        run: |
+          npm install --no-audit --no-fund
+          npx playwright install --with-deps chromium
+
       - name: Run daily job
         env:
           TRENCH_DATA_DIR: data

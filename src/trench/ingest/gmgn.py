@@ -27,7 +27,7 @@ from trench.timeutil import utcnow
 log = logging.getLogger(__name__)
 SCRIPT = Path(__file__).resolve().parents[3] / "tools" / "gmgn" / "collect.js"
 FIRST_RUN_PAGES = 10   # 500 trades on first sight of a token
-DAILY_PAGES = 40       # upper bound per token per run when catching up
+DAILY_PAGES = 15       # per token per run; busy tokens are sampled, not complete
 
 
 def build_jobs(lake: Lake, pit: PITStore) -> list[dict]:

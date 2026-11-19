@@ -90,6 +90,17 @@ def ingest_evm_swaps(
         typer.echo(json.dumps(r.__dict__, default=str))
 
 
+@ingest_app.command("gmgn")
+def ingest_gmgn() -> None:
+    """Solana trades, holders and smart-wallet ranks from GMGN (headless browser)."""
+    from trench.ingest import gmgn
+    from trench.pit import PITStore
+
+    s = Settings.from_env()
+    rep = gmgn.run(Lake(s.lake_dir), RawStore(s.raw_dir), PITStore(s.lake_dir / "published"))
+    typer.echo(json.dumps(rep))
+
+
 @app.command("universe")
 def universe_build() -> None:
     """Publish new universe entries from the snapshots fetched so far."""
@@ -113,10 +124,11 @@ def daily() -> None:
         ("tehcscreener", ingest_tehcscreener),
         ("defillama", ingest_defillama),
         # markets reads TEHscreener's top tokens, so it runs after it
-        ("markets", lambda: ingest_markets(ohlcv_budget=60)),
+        ("markets", lambda: ingest_markets(ohlcv_budget=30)),
         ("universe", universe_build),
         ("evm-swaps", lambda: ingest_evm_swaps(chain=["robinhood", "base", "ethereum"],
                                                days_back=2.0)),
+        ("gmgn", ingest_gmgn),
         ("usage", usage),
     ]
     failed = []

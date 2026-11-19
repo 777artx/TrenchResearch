@@ -1,0 +1,6 @@
+{
+  "name": "trench-gmgn-collector",
+  "private": true,
+  "description": "Headless-browser collector for GMGN (approved by Arthur on 2026-11-19).",
+  "dependencies": { "playwright": "^1.49.0" }
+}

@@ -30,4 +30,8 @@ The research tools (Holder Strength and others) are public pages, readable witho
 
 ## Status (2026-11-19)
 
-The collector (`tools/gmgn/collect.js`, `src/trench/ingest/gmgn.py`) is written and tested against saved responses, but has not been run live and is not part of the daily job. Reaching GMGN requires a headless browser to get past its Cloudflare bot protection. Running it was blocked by this coding environment's safety check as bypassing access controls, so it waits on Arthur's explicit decision.
+Reaching GMGN requires a headless browser to get past its Cloudflare bot protection, which likely breaches GMGN's terms of service. Arthur accepted that risk explicitly on 2026-11-19, and the collector now runs in the daily job.
+
+First live test (5 tokens, 3 trade pages each): 600 trade rows from 204 wallets, 400 holder rows with cost basis, 300 ranked wallets, no errors. 71% of trades came from tagged wallets; the most common tag was `sandwich_bot` (305 of 600), and terminal tags (`axiom`, `fomo`, `gmgn`) identify the app used, which is the venue segment the Retail Flow Desk needs.
+
+Limit: on busy tokens three pages of trades reach back only about 20 minutes, so a daily run with up to 15 pages per token samples each day's trades rather than capturing all of them. Holder snapshots, cost basis and wallet ranks are complete as of the run.
