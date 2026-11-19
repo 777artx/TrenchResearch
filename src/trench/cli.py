@@ -130,6 +130,7 @@ def daily() -> None:
         ("evm-swaps", lambda: ingest_evm_swaps(chain=["robinhood", "base", "ethereum"],
                                                days_back=2.0)),
         ("gmgn", ingest_gmgn),
+        ("indicators", indicators),
         ("usage", usage),
     ]
     failed = []

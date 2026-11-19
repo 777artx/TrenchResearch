@@ -20,6 +20,9 @@ def test_trade_rows_from_real_response():
 def test_holder_and_rank_rows_from_real_responses():
     h = gmgn.holder_rows(json.loads((FIX / "token_holders_.json").read_text()), "TOK")
     assert len(h) == 100 and h[0]["rank"] == 1 and h[0]["wallet"]
+    for k in ("balance", "share", "usd_value", "profit", "avg_cost"):
+        assert all(k in r for r in h) and h[0][k] is not None, k
+    assert h[0]["token_tags"] and "creator" in h[0]["token_tags"]
     w = gmgn.wallet_rank_rows(json.loads((FIX / "rank_sol_wallets_7d.json").read_text()), "7d")
     assert len(w) == 100 and w[0]["wallet"]
 

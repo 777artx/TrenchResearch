@@ -14,17 +14,30 @@ from trench.timeutil import utcnow
 log = logging.getLogger(__name__)
 
 
+RESTATEMENT: str | None = None  # set by run() when correcting an earlier publish
+
+
 def _pub(pit: PITStore, metric: str, readings) -> int:
+    """Publish new readings. A reading that already exists for the same day is only
+    re-published as an explicit restatement (with its reason) when its value changed."""
     if not readings:
         return 0
-    existing = set()
+    existing = {}
     if metric in pit.lake.tables():
-        existing = {(r[1], r[2]) for r in pit.read(metric, formula_version="0").fetchall()}
+        existing = {(r[1], r[2]): r[3] for r in pit.read(metric, formula_version="0").fetchall()}
     new = [r for r in readings if (r.entity, r.as_of) not in existing]
-    return pit.publish(metric, new, formula_version="0", input_cutoff=utcnow()) if new else 0
+    changed = [r for r in readings if (r.entity, r.as_of) in existing
+               and existing[(r.entity, r.as_of)] != r.value]
+    n = pit.publish(metric, new, formula_version="0", input_cutoff=utcnow()) if new else 0
+    if changed and RESTATEMENT:
+        n += pit.publish(metric, changed, formula_version="0", input_cutoff=utcnow(),
+                         restatement_reason=RESTATEMENT)
+    return n
 
 
-def run(lake: Lake, pit: PITStore, out: Path) -> list[tuple]:
+def run(lake: Lake, pit: PITStore, out: Path, restatement: str | None = None) -> list[tuple]:
+    global RESTATEMENT
+    RESTATEMENT = restatement
     rows: list[tuple] = []  # (group, name, status, reading)
 
     def step(group, name, metric, fn, status="Computing, not validated"):

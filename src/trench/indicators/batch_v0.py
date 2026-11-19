@@ -30,8 +30,8 @@ MEME_PERPS = {"kPEPE", "WIF", "POPCAT", "kBONK", "FARTCOIN", "PNUT", "TRUMP", "M
               "MOG", "kMOG", "GIGA", "USELESS", "TROLL"}
 
 
-def _segment(tags: str | None) -> str | None:
-    t = set((tags or "").split(","))
+def _segment(tags) -> str | None:
+    t = set(tags.split(",")) if isinstance(tags, str) else set()
     if t & CONSUMER:
         return "CONSUMER"
     if t & PRO:
@@ -224,7 +224,7 @@ def cohort_flow_solana(lake: Lake):
             "WHERE run_id = (SELECT max(run_id) FROM gmgn_wallet_rank)").fetchall()}
     whales = defaultdict(set)
     for r in hold.itertuples():
-        if (r.share or 0) >= 0.005 and not r.exchange:
+        if (r.share or 0) >= 0.005 and not (isinstance(r.exchange, str) and r.exchange):
             whales[r.token].add(r.wallet)
     mc = _mcaps(lake, "solana")
     readings, pos, n = [], 0, 0
@@ -250,23 +250,29 @@ def cohort_flow_solana(lake: Lake):
 
 
 def cost_basis_map(lake: Lake):
+    """Share of top-100 holder supply in profit (GMGN ``profit`` > 0) and the overhang:
+    the balance-weighted cost per token of holders at a loss. GMGN's ``cost`` field is
+    the total USD cost of the holding, so cost per token = cost / balance."""
     hold = _gmgn_holders(lake)
     if hold.empty:
         return [], "no holder snapshots yet"
     readings, inprof = [], []
     for tok, g in hold.groupby("token"):
-        g = g[g.balance.fillna(0) > 0]
-        priced = g[g.avg_cost.notna() & (g.avg_cost > 0) & g.usd_value.notna()]
-        if priced.empty:
+        g = g[(g.balance.fillna(0) > 0) & g.profit.notna() & g.usd_value.notna()]
+        if g.empty:
             continue
-        px = (priced.usd_value / priced.balance).median()
-        in_profit = priced.loc[priced.avg_cost < px, "balance"].sum() / priced.balance.sum()
-        losers = priced[priced.avg_cost > px]
-        overhang = (float(np.average(losers.avg_cost, weights=losers.balance))
+        px = float((g.usd_value / g.balance).median())
+        if 0.97 <= px <= 1.03:
+            continue  # USD-pegged token: not a memecoin (see docs/indicators/STATUS.md)
+        in_profit = g.loc[g.profit > 0, "balance"].sum() / g.balance.sum()
+        losers = g[(g.profit < 0) & g.avg_cost.notna()]
+        overhang = (float(np.average(losers.avg_cost / losers.balance, weights=losers.balance))
                     if len(losers) else None)
         inprof.append(in_profit)
-        readings.append(_rd(f"solana:{tok}", in_profit, None, price=float(px),
-                            overhang_price=overhang, holders_priced=len(priced)))
+        readings.append(_rd(f"solana:{tok}", in_profit, None, price=px,
+                            overhang_price=overhang,
+                            overhang_vs_price=(overhang / px - 1) if overhang else None,
+                            holders=len(g)))
     return readings, (f"{len(readings)} Solana coins; median share of top-holder supply in "
                       f"profit {np.median(inprof):.0%}" if inprof else "no priced holders")
 
@@ -280,9 +286,12 @@ def quality_flow(lake: Lake, cohort_readings, cbm_readings):
     prof = {r.entity: r.value for r in cbm_readings}
     rows = []
     for tok, g in hold.groupby("token"):
-        g = g[(g.balance.fillna(0) > 0) & g.exchange.isna()]
-        tags = g.tags.fillna("") + "," + g.wallet_tag.fillna("")
-        insider = g.loc[tags.str.contains("sniper|bundler|dev|insider"), "share"].sum()
+        pools = g.exchange.fillna("").astype(str).str.len() > 0
+        g = g[(g.balance.fillna(0) > 0) & ~pools]
+        if len(g) and 0.97 <= float((g.usd_value / g.balance).median()) <= 1.03:
+            continue  # USD-pegged token
+        tt = g.token_tags.fillna("") if "token_tags" in g else g.tags.fillna("")
+        insider = g.loc[tt.str.contains("creator|dev_team|sniper|bundler|insider"), "share"].sum()
         top10 = g.nlargest(10, "share")
         top_val = top10.usd_value.sum()
         # Depth within 5% price impact of a constant-product pool is about 2.47% of
@@ -348,7 +357,7 @@ def meme_perps():
             f_now = float(x["funding"]) * 24 * 365
             oi = float(x["openInterest"]) * float(x["markPx"])
             hist = c.post("https://api.hyperliquid.xyz/info", json={
-                "type": "fundingHistory", "coin": a["name"], "startTime": start}).json()
+                "type": "fundingHistory", "coin": a["name"], "startTime": start}).json() or []
             fr = np.array([float(h["fundingRate"]) for h in hist]) * 24 * 365
             pct = float((fr < f_now).mean() * 100) if len(fr) else None
             readings.append(_rd(f"perp={a['name']}", f_now, None, open_interest_usd=oi,
@@ -359,7 +368,8 @@ def meme_perps():
     w = sum(r[1] * r[2] for r in rows) / oi_tot if oi_tot else 0
     return readings, (f"{len(rows)} meme perps, ${oi_tot / 1e6:,.0f}M open interest, "
                       f"OI-weighted funding {w:+.1%}/yr; top: " +
-                      ", ".join(f"{n} {f:+.0%} (p{p:.0f})" for n, f, _, p in rows[:4]))
+                      ", ".join(f"{n} {f:+.0%}" + (f" (p{p:.0f})" if p is not None else "")
+                                for n, f, _, p in rows[:4]))
 
 
 def capital_inflow():

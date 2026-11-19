@@ -49,7 +49,8 @@ def holder_rows(body: dict, token: str) -> list[dict]:
     return [{
         "token": token, "rank": i + 1, "wallet": h.get("address"),
         "token_account": h.get("account_address"), "addr_type": h.get("addr_type"),
-        "exchange": h.get("exchange"), "balance": _f(h.get("balance")),
+        # A pool name (e.g. pump_amm) for pool wallets, empty for ordinary wallets.
+        "exchange": h.get("exchange") or None, "balance": _f(h.get("balance")),
         "share": _f(h.get("amount_percentage")), "usd_value": _f(h.get("usd_value")),
         "avg_cost": _f(h.get("cost")),
         "total_cost": _f(h.get("accu_cost") or h.get("total_cost")),
@@ -58,7 +59,9 @@ def holder_rows(body: dict, token: str) -> list[dict]:
         "sold_income": _f(h.get("history_sold_income")),
         "transfer_in": _f(h.get("history_transfer_in_amount")),
         "transfer_out": _f(h.get("history_transfer_out_amount")),
-        "tags": ",".join(h.get("tags") or h.get("maker_token_tags") or []) or None,
+        "tags": ",".join(h.get("tags") or []) or None,
+        # Per-token roles: creator, dev_team, sniper, bundler, top_holder, transfer_in ...
+        "token_tags": ",".join(h.get("maker_token_tags") or []) or None,
         "wallet_tag": h.get("wallet_tag_v2"),
     } for i, h in enumerate(lst)]
 
