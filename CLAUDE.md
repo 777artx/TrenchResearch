@@ -20,8 +20,8 @@ An onchain research website for active memecoin and microcap traders on Solana, 
 ## Data sources
 - Free sources first: TEHscreener API (credit "tehcscreener.com" when publishing derived stats; confirm commercial terms), Dune, DefiLlama, DexScreener, GeckoTerminal, Hyperliquid info API, Mobula.
 - Robinhood Chain has adequate third-party providers; do not build a custom indexer.
-- Do not scrape Sparsity (no public API; account-based product).
-- Ask Arthur before committing to any paid data provider or API plan.
+- Scraping is allowed, including Sparsity and GMGN (Arthur, 2026-11-19: the site is a private tool). Scrape politely: low request rates, cache every raw response, and prefer an official API where one exists.
+- Spending stays at $0 (Arthur, 2026-11-19). Do not subscribe to any paid data provider or API plan; ask Arthur if a paid option becomes essential.
 - Respect rate limits (TEHscreener: 120 requests/min). Cache raw responses.
 
 ## Scope guardrails

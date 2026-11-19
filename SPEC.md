@@ -93,7 +93,7 @@ Weaknesses found in review (do not repeat):
 
 ### 4.2 Sparsity (sparsitydata.com)
 
-- No public API found. The site is account-based (alerts, accounts, refunds). Do not scrape it.
+- No public API found. The site is account-based (alerts, accounts, refunds). Scraping was approved by Arthur on 2026-11-19 (private tool).
 - Its stated sources are Dune and Mobula for onchain data and DEX Screener for market caps. We can build equivalent inputs from the same sources.
 - Holder Strength: 4 areas, 9 metrics. Conviction 50% (drawdowns survived, supply held, fullported holders), Demand 25% (holder growth, whale accumulation, dip absorption), Market health 12.5% (holder concentration, liquidity for size), Relative strength 12.5%. Metrics are scored against an unnamed fixed reference. Universe: $2M+ market cap, $100K+ liquidity, 14+ days of trading, hand-reviewed requests, 63 coins. Holders exclude pools, contracts, exchanges, burn, locked supply and automated trading wallets, but not insider clusters. Holders are counted at $100+.
 - Bottoming Test: three signs read in strict order (sellers capitulated at a deep loss; the low holding; demand returning with a higher share of new wallets), only while well below the 30-day high. Daily. Cost basis from Dune main-pool trades.
