@@ -214,7 +214,9 @@ def publish(lake: Lake, pit: PITStore, day: date) -> int:
     pooled = df.groupby("pad").agg(n=("lstar", "sum"), grad=("grad", "sum"),
                                    surv7=("surv7", "sum"), runner=("runner", "sum"),
                                    rug=("rug", "sum"))
-    today = df[df.cohort_day == pd.Timestamp(day).date()] if len(df) else df
+    if len(df):
+        df["cohort_day"] = pd.to_datetime(df["cohort_day"]).dt.date
+    today = df[df.cohort_day == day] if len(df) else df
     if today.empty:
         return 0
     rows = {}
