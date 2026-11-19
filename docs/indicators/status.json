@@ -1,0 +1,116 @@
+[
+ {
+  "group": "Market",
+  "name": "Trench Regime: Activity",
+  "status": "Description only (failed backtest)",
+  "reading": "base 53 hot, ethereum 80 hot, solana 49 cold"
+ },
+ {
+  "group": "Market",
+  "name": "Trench Regime: Sentiment (mSOPR)",
+  "status": "Computing, not validated",
+  "reading": "robinhood: 1.008 (profit-taking, 1,610 organic sells, 72 h window); base: 0.999 (selling at a loss, 387 organic sells, 5 h window); ethereum: no swaps yet"
+ },
+ {
+  "group": "Market",
+  "name": "Regime state (Activity \u00d7 Sentiment)",
+  "status": "Pending data",
+  "reading": "Sentiment has no 365-day percentile history yet; first state needs ~180 days of organic mSOPR"
+ },
+ {
+  "group": "Market",
+  "name": "Chain Rotation",
+  "status": "Description only (failed backtest)",
+  "reading": "base leading, ethereum lagging, robinhood improving, solana improving"
+ },
+ {
+  "group": "Market",
+  "name": "Launchpad Scorecard",
+  "status": "Computing, not validated",
+  "reading": "see launchpad cohort reports; Long.xyz and PonsFamily, cohort 2026-11-11"
+ },
+ {
+  "group": "Flow",
+  "name": "Retail Flow Desk (market)",
+  "status": "Computing, not validated",
+  "reading": "consumer-app share of terminal volume 43.9% on 2026-11-18 00:00:00 (robust z -0.1 vs 90 days); average ticket CONSUMER $45, PRO $49, TG-BOT $68"
+ },
+ {
+  "group": "Flow",
+  "name": "Retail Flow Desk (token flags)",
+  "status": "Computing, not validated",
+  "reading": "65 Solana coins: 0 DISTRIBUTION, 17 ACCUMULATION, 48 no flag (trade sample; RETAIL CHASE needs hourly data)"
+ },
+ {
+  "group": "Flow",
+  "name": "Cohort Flow",
+  "status": "Computing, not validated",
+  "reading": "65 Solana coins scored; smart-flow breadth 1/65 coins with positive smart-wallet net buying (bps of market cap; z-scores need 90 days of history)"
+ },
+ {
+  "group": "Flow",
+  "name": "Attention vs Flow",
+  "status": "Pending data",
+  "reading": "needs a social feed; GMGN callouts are not yet collected daily"
+ },
+ {
+  "group": "Coin",
+  "name": "Cost-basis map",
+  "status": "Computing, not validated",
+  "reading": "62 Solana coins; median share of top-holder supply in profit 31%"
+ },
+ {
+  "group": "Coin",
+  "name": "Quality \u00d7 Flow setup",
+  "status": "Computing, not validated",
+  "reading": "62 Solana coins: Accumulation 5, Avoid 27, Distribution risk 23, Speculative bid 7 (partial components)"
+ },
+ {
+  "group": "Coin",
+  "name": "Bottom Probability (eligibility)",
+  "status": "Computing, not validated",
+  "reading": "63 of 163 universe coins with price history are at least 50% below their 90-day high (eligible); the probability model needs labelled drawdown history and is not trained"
+ },
+ {
+  "group": "Trust",
+  "name": "Public track record",
+  "status": "Pending data",
+  "reading": "storage and logging ready; no indicator has signal status, so no live signals are logged yet"
+ },
+ {
+  "group": "Trust",
+  "name": "Organic ratio",
+  "status": "Computing, not validated",
+  "reading": "robinhood: 15% of USD, 58% of swaps (28,455 swaps); base: 21% of USD, 43% of swaps (7,347 swaps); solana (GMGN tags, sample): 69% of USD not from sandwich bots or bundlers"
+ },
+ {
+  "group": "Extra",
+  "name": "Meme perp positioning",
+  "status": "Computing, not validated",
+  "reading": "25 meme perps, $128M open interest, OI-weighted funding +3.4%/yr; top: PUMP +9% (p25), DOGE -4% (p11), kPEPE +7% (p21), FARTCOIN +11% (p18)"
+ },
+ {
+  "group": "Extra",
+  "name": "Net capital inflow by chain",
+  "status": "Computing, not validated",
+  "reading": "stablecoin supply 7-day change: solana -8.2% ($-1,170M), base -3.0% ($-161M), ethereum -1.4% ($-1,865M), robinhood -2.3% ($-24M)"
+ },
+ {
+  "group": "Extra",
+  "name": "Serial-deployer concentration + Trench PnL",
+  "status": "Computing, not validated",
+  "reading": "long.xyz: top-5 creators made 87% of launches; median early-buyer 24 h return -11%; ponsfamily.com: top-5 creators made 5% of launches; median early-buyer 24 h return -27%"
+ },
+ {
+  "group": "Extra",
+  "name": "Urgency index (Solana)",
+  "status": "Computing, not validated",
+  "reading": "median priority fee + tip 0.00001 SOL per Solana trade (27,007 trades sampled)"
+ },
+ {
+  "group": "Extra",
+  "name": "Smart-flow breadth",
+  "status": "Pending data",
+  "reading": "included in Cohort Flow line above"
+ }
+]

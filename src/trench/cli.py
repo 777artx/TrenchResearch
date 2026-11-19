@@ -127,10 +127,12 @@ def daily() -> None:
         # markets reads TEHscreener's top tokens, so it runs after it
         ("markets", lambda: ingest_markets(ohlcv_budget=30)),
         ("universe", universe_build),
-        ("evm-swaps", lambda: ingest_evm_swaps(chain=["robinhood", "base", "ethereum"],
+        # Ethereum first: the busiest chain (Robinhood) last, so it cannot starve the others.
+        ("evm-swaps", lambda: ingest_evm_swaps(chain=["ethereum", "base", "robinhood"],
                                                days_back=2.0)),
         ("gmgn", ingest_gmgn),
         ("indicators", indicators),
+        ("site", lambda: site(out="data/site/index.html")),
         ("usage", usage),
     ]
     failed = []
@@ -170,6 +172,20 @@ def indicators() -> None:
                       Path("docs/indicators/STATUS.md"))
     for g, n, st, r in rows:
         typer.echo(f"[{g}] {n} | {st} | {r}")
+
+
+@app.command()
+def site(out: str = typer.Option("site/index.html")) -> None:
+    """Build the research site from published readings."""
+    from trench import site as S
+    from trench.pit import PITStore
+
+    s = Settings.from_env()
+    html_ = S.build(Lake(s.lake_dir), PITStore(s.lake_dir / "published"),
+                    Path("docs/indicators/status.json"))
+    Path(out).parent.mkdir(parents=True, exist_ok=True)
+    Path(out).write_text(html_)
+    typer.echo(f"wrote {out} ({len(html_):,} bytes)")
 
 
 @app.command()

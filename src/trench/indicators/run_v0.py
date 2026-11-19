@@ -51,6 +51,37 @@ def run(lake: Lake, pit: PITStore, out: Path, restatement: str | None = None) ->
             rows.append((group, name, "Error", f"{type(exc).__name__}: {str(exc)[:120]}"))
             return []
 
+    # Activity and Chain Rotation (formula 0-raw): recompute and append any new days.
+    def raw_market():
+        import pandas as pd
+
+        from trench.indicators import activity as A
+        from trench.indicators import chain_rotation as CR
+        vol = lake.as_of("llama_dex_daily", ["chain", "day"]).df()[["chain", "day", "volume_usd"]]
+        px = lake.as_of("llama_price_daily", ["asset", "day"]).df()[["asset", "day", "price_usd"]]
+        for d in (vol, px):
+            d["day"] = pd.to_datetime(d["day"]).dt.date
+        vol = vol[vol.chain.isin(["solana", "base", "ethereum", "robinhood"])]
+        cut = lake.connect().execute("SELECT max(fetched_at) FROM llama_dex_daily").fetchone()[0]
+        rot = CR.compute(vol[vol.day >= pd.Timestamp("2023-08-01").date()])
+        n1 = CR.publish(pit, rot, formula_version="0-raw", input_cutoff=cut,
+                        drop_rule_failed=True, backfill=False)
+        pm = px.set_index(["asset", "day"])["price_usd"]
+        vol["V"] = [v / pm.get((A.BASE_ASSET[c], d), float("nan"))
+                    for c, d, v in zip(vol.chain, vol.day, vol.volume_usd, strict=True)]
+        w = lake.as_of("teh_chain_daily", ["chain", "day"]).df()[["chain", "day", "active_wallets"]]
+        w["day"] = pd.to_datetime(w["day"]).dt.date
+        inp = vol[["chain", "day", "V"]].merge(w.rename(columns={"active_wallets": "P"}),
+                                                on=["chain", "day"], how="left")
+        act = A.compute(inp[inp.day >= pd.Timestamp("2023-01-01").date()])
+        n2 = A.publish(pit, act, formula_version="0-raw", input_cutoff=cut,
+                       drop_rule_failed=True, backfill=False)
+        return [], f"appended {n1} rotation and {n2} activity readings"
+    try:
+        raw_market()
+    except Exception:
+        traceback.print_exc()
+
     # Existing published indicators
     def latest(metric, fmt):
         if metric not in pit.lake.tables():
@@ -107,7 +138,11 @@ def run(lake: Lake, pit: PITStore, out: Path, restatement: str | None = None) ->
     step("Extra", "Smart-flow breadth", "smart_flow_breadth",
          lambda: ([], "included in Cohort Flow line above"))
 
+    import json as _json
+
     out.parent.mkdir(parents=True, exist_ok=True)
+    (out.parent / "status.json").write_text(_json.dumps(
+        [{"group": g, "name": n, "status": s, "reading": r} for g, n, s, r in rows], indent=1))
     lines = [f"# Indicator status ({utcnow():%Y-%m-%d %H:%M} UTC)", "",
              "Every reading is research, not financial advice. \"Not validated\" means the "
              "indicator has no backtest yet; nothing here has signal status.", "",
