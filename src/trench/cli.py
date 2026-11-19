@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import logging
+from pathlib import Path
 
 import typer
 
@@ -155,6 +156,19 @@ def tables() -> None:
             f"SELECT count(*), max(fetched_at), count(DISTINCT run_id) FROM {t}"
         ).fetchone()
         typer.echo(f"{t:32s} rows={n:>9,d} runs={runs:>3d} last_fetch={last}")
+
+
+@app.command()
+def indicators() -> None:
+    """Compute and publish every v0 indicator; write docs/indicators/STATUS.md."""
+    from trench.indicators import run_v0
+    from trench.pit import PITStore
+
+    s = Settings.from_env()
+    rows = run_v0.run(Lake(s.lake_dir), PITStore(s.lake_dir / "published"),
+                      Path("docs/indicators/STATUS.md"))
+    for g, n, st, r in rows:
+        typer.echo(f"[{g}] {n} | {st} | {r}")
 
 
 @app.command()
