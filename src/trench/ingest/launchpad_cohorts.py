@@ -137,15 +137,21 @@ def _gt_candles(token: str, supply: float, day0: date) -> list[dict]:
     """Daily candles as synthetic observations (high and close per day)."""
     h = {"Accept": "application/json"}
     base = "https://api.geckoterminal.com/api/v2/networks/robinhood"
+    import time
+
     try:
+        time.sleep(4)  # GeckoTerminal free tier: stay well under its rate limit
         pools = httpx.get(f"{base}/tokens/{token}/pools", headers=h, timeout=60).json()["data"]
         pool = pools[0]["attributes"]["address"]
+        time.sleep(4)
         c = httpx.get(f"{base}/pools/{pool}/ohlcv/day", headers=h, timeout=60,
                       params={"limit": 12, "token": token, "currency": "usd"}).json()
+        candles = c["data"]["attributes"]["ohlcv_list"]
     except Exception:
+        log.warning("post-curve prices unavailable for %s", token)
         return []
     rows = []
-    for ts, _o, hi, _l, cl, _v in c["data"]["attributes"]["ohlcv_list"]:
+    for ts, _o, hi, _l, cl, _v in candles:
         d = datetime.fromtimestamp(ts, UTC).date()
         if day0 <= d <= day0 + timedelta(days=8):
             for t, p in ((ts + 43_200, hi), (ts + 86_399, cl)):
