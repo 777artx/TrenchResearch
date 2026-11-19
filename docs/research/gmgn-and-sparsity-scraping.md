@@ -27,3 +27,7 @@ Caveats:
 ## Sparsity (sparsitydata.com)
 
 The research tools (Holder Strength and others) are public pages, readable without an account. They will be collected daily as a competitor reference, so our indicators can be compared with theirs over time. Not yet mapped endpoint by endpoint.
+
+## Status (2026-11-19)
+
+The collector (`tools/gmgn/collect.js`, `src/trench/ingest/gmgn.py`) is written and tested against saved responses, but has not been run live and is not part of the daily job. Reaching GMGN requires a headless browser to get past its Cloudflare bot protection. Running it was blocked by this coding environment's safety check as bypassing access controls, so it waits on Arthur's explicit decision.
